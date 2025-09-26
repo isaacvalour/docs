@@ -1,0 +1,109 @@
+---
+title: "Update API Key Label"
+api: "PATCH /v1/api-keys/{id}/label"
+description: "Update the label of an API key"
+---
+
+## Overview
+
+Update the label and description of an existing API key.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="label" type="string" required>
+  New label for the API key
+</ParamField>
+
+<ParamField body="description" type="string">
+  New description for the API key
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  API key ID
+</ResponseField>
+
+<ResponseField name="label" type="string">
+  Updated label
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Updated description
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+  Update timestamp (ISO 8601)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X PATCH "https://api.railsfromthecrypt.com/v1/api-keys/ak_123e4567-e89b-12d3-a456-426614174000/label" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "Updated Production Key",
+    "description": "Updated description"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/api-keys/ak_123e4567-e89b-12d3-a456-426614174000/label', {
+  method: 'PATCH',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    label: 'Updated Production Key',
+    description: 'Updated description'
+  })
+});
+
+const result = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "id": "ak_123e4567-e89b-12d3-a456-426614174000",
+  "label": "Updated Production Key",
+  "description": "Updated description",
+  "updated_at": "2024-01-01T12:30:00Z"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Get API Key"
+    icon="search"
+    href="/api/api-keys/get"
+  >
+    Get specific API key details
+  </Card>
+  <Card
+    title="Delete API Key"
+    icon="trash"
+    href="/api/api-keys/delete"
+  >
+    Delete an API key
+  </Card>
+</CardGroup>

@@ -1,0 +1,387 @@
+---
+title: "Health Check"
+api: "GET /v1/system/health"
+description: "Check system health and status"
+---
+
+## Overview
+
+Check the health and status of the HR API system. This endpoint provides information about the system's current state, including database connectivity, external service status, and overall system health.
+
+<Note>
+  This endpoint does not require authentication and can be used for monitoring and load balancer health checks.
+</Note>
+
+## Request
+
+No parameters required.
+
+## Response
+
+<ResponseField name="status" type="string">
+  Overall system status. Possible values: "healthy", "degraded", "unhealthy".
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  Current server timestamp in ISO 8601 format.
+</ResponseField>
+
+<ResponseField name="version" type="string">
+  API version.
+</ResponseField>
+
+<ResponseField name="environment" type="string">
+  Environment (e.g., "production", "staging", "development").
+</ResponseField>
+
+<ResponseField name="services" type="object">
+  Status of various system services.
+</ResponseField>
+
+<ResponseField name="services.database" type="object">
+  Database service status.
+</ResponseField>
+
+<ResponseField name="services.database.status" type="string">
+  Database status: "healthy", "degraded", "unhealthy".
+</ResponseField>
+
+<ResponseField name="services.database.response_time" type="number">
+  Database response time in milliseconds.
+</ResponseField>
+
+<ResponseField name="services.redis" type="object">
+  Redis service status.
+</ResponseField>
+
+<ResponseField name="services.redis.status" type="string">
+  Redis status: "healthy", "degraded", "unhealthy".
+</ResponseField>
+
+<ResponseField name="services.redis.response_time" type="number">
+  Redis response time in milliseconds.
+</ResponseField>
+
+<ResponseField name="services.external_apis" type="object">
+  External API service status.
+</ResponseField>
+
+<ResponseField name="services.external_apis.status" type="string">
+  External APIs status: "healthy", "degraded", "unhealthy".
+</ResponseField>
+
+<ResponseField name="services.external_apis.response_time" type="number">
+  External APIs response time in milliseconds.
+</ResponseField>
+
+<ResponseField name="uptime" type="number">
+  System uptime in seconds.
+</ResponseField>
+
+<ResponseField name="memory_usage" type="object">
+  Memory usage information.
+</ResponseField>
+
+<ResponseField name="memory_usage.used" type="number">
+  Used memory in bytes.
+</ResponseField>
+
+<ResponseField name="memory_usage.total" type="number">
+  Total memory in bytes.
+</ResponseField>
+
+<ResponseField name="memory_usage.percentage" type="number">
+  Memory usage percentage.
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://api.railsfromthecrypt.com/v1/system/health"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/system/health');
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.get('https://api.railsfromthecrypt.com/v1/system/health')
+data = response.json()
+print(data)
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Healthy System
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "version": "1.0.0",
+  "environment": "production",
+  "services": {
+    "database": {
+      "status": "healthy",
+      "response_time": 15
+    },
+    "redis": {
+      "status": "healthy",
+      "response_time": 2
+    },
+    "external_apis": {
+      "status": "healthy",
+      "response_time": 150
+    }
+  },
+  "uptime": 86400,
+  "memory_usage": {
+    "used": 1073741824,
+    "total": 2147483648,
+    "percentage": 50.0
+  }
+}
+```
+
+```json Degraded System
+{
+  "status": "degraded",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "version": "1.0.0",
+  "environment": "production",
+  "services": {
+    "database": {
+      "status": "healthy",
+      "response_time": 15
+    },
+    "redis": {
+      "status": "degraded",
+      "response_time": 5000
+    },
+    "external_apis": {
+      "status": "healthy",
+      "response_time": 150
+    }
+  },
+  "uptime": 86400,
+  "memory_usage": {
+    "used": 1610612736,
+    "total": 2147483648,
+    "percentage": 75.0
+  }
+}
+```
+
+```json Unhealthy System
+{
+  "status": "unhealthy",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "version": "1.0.0",
+  "environment": "production",
+  "services": {
+    "database": {
+      "status": "unhealthy",
+      "response_time": null
+    },
+    "redis": {
+      "status": "healthy",
+      "response_time": 2
+    },
+    "external_apis": {
+      "status": "healthy",
+      "response_time": 150
+    }
+  },
+  "uptime": 86400,
+  "memory_usage": {
+    "used": 1610612736,
+    "total": 2147483648,
+    "percentage": 75.0
+  }
+}
+```
+
+</ResponseExample>
+
+## Status Codes
+
+<ResponseField name="200" type="number">
+  Health check successful (regardless of system status)
+</ResponseField>
+
+<ResponseField name="503" type="number">
+  Service unavailable (system is unhealthy)
+</ResponseField>
+
+## Status Meanings
+
+### System Status
+
+<CardGroup cols={3}>
+  <Card title="Healthy" icon="check-circle">
+    All services are functioning normally
+    - Database: < 100ms response time
+    - Redis: < 10ms response time
+    - External APIs: < 1000ms response time
+    - Memory usage: < 80%
+  </Card>
+  <Card title="Degraded" icon="exclamation-triangle">
+    Some services are experiencing issues
+    - One or more services have slow response times
+    - Memory usage: 80-90%
+    - System is still functional but may be slow
+  </Card>
+  <Card title="Unhealthy" icon="times-circle">
+    Critical services are down
+    - Database or Redis is unavailable
+    - Memory usage: > 90%
+    - System is not functional
+  </Card>
+</CardGroup>
+
+## Monitoring Integration
+
+### Load Balancer Health Check
+
+<CodeGroup>
+
+```bash Load Balancer Configuration
+# Nginx configuration
+upstream hr_api {
+    server api1.hashrails.xyz:443;
+    server api2.hashrails.xyz:443;
+    
+    # Health check
+    health_check uri=/v1/system/health interval=30s;
+}
+
+# AWS Application Load Balancer
+# Health check path: /v1/system/health
+# Health check interval: 30 seconds
+# Healthy threshold: 2
+# Unhealthy threshold: 5
+```
+
+</CodeGroup>
+
+### Monitoring Script
+
+<CodeGroup>
+
+```javascript JavaScript
+class HealthMonitor {
+  constructor(apiUrl) {
+    this.apiUrl = apiUrl;
+  }
+  
+  async checkHealth() {
+    try {
+      const response = await fetch(`${this.apiUrl}/v1/system/health`);
+      const data = await response.json();
+      
+      return {
+        status: data.status,
+        services: data.services,
+        timestamp: data.timestamp,
+        isHealthy: data.status === 'healthy'
+      };
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        error: error.message,
+        timestamp: new Date().toISOString(),
+        isHealthy: false
+      };
+    }
+  }
+  
+  async startMonitoring(interval = 60000) {
+    setInterval(async () => {
+      const health = await this.checkHealth();
+      
+      if (!health.isHealthy) {
+        console.warn('System health check failed:', health);
+        // Send alert to monitoring system
+        this.sendAlert(health);
+      }
+    }, interval);
+  }
+  
+  sendAlert(health) {
+    // Implement alerting logic (email, Slack, PagerDuty, etc.)
+    console.log('ALERT: System health issue detected', health);
+  }
+}
+
+// Usage
+const monitor = new HealthMonitor('https://api.railsfromthecrypt.com');
+monitor.startMonitoring(60000); // Check every minute
+```
+
+</CodeGroup>
+
+## Use Cases
+
+### Application Monitoring
+
+<AccordionGroup>
+  <Accordion title="Load Balancer Health Checks">
+    - Configure load balancers to use this endpoint
+    - Set appropriate health check intervals
+    - Configure healthy/unhealthy thresholds
+    - Monitor response times and status codes
+  </Accordion>
+  <Accordion title="Application Monitoring">
+    - Integrate with monitoring tools (Datadog, New Relic, etc.)
+    - Set up alerts for degraded or unhealthy status
+    - Monitor system performance over time
+    - Track service dependencies
+  </Accordion>
+  <Accordion title="Status Page">
+    - Display system status on public status page
+    - Show real-time system health information
+    - Provide transparency to users
+    - Historical status data
+  </Accordion>
+</AccordionGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Limit Check"
+    icon="chart-line"
+    href="/api/system/limit-check"
+  >
+    Check system limits and quotas
+  </Card>
+  <Card
+    title="Teardown"
+    icon="trash"
+    href="/api/system/teardown"
+  >
+    System teardown and cleanup
+  </Card>
+  <Card
+    title="Status Page"
+    icon="globe"
+    href="https://status.hashrails.xyz"
+  >
+    Public system status page
+  </Card>
+  <Card
+    title="Support"
+    icon="headset"
+    href="mailto:support@hashrails.xyz"
+  >
+    Get help with system issues
+  </Card>
+</CardGroup>

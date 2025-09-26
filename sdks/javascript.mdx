@@ -1,0 +1,996 @@
+---
+title: "JavaScript SDK"
+description: "Complete JavaScript SDK for HR API with examples and best practices"
+---
+
+## Installation
+
+Install the HR API JavaScript SDK using npm:
+
+```bash
+npm install @hashrails/hr-api-sdk
+```
+
+Or using yarn:
+
+```bash
+yarn add @hashrails/hr-api-sdk
+```
+
+## Basic Setup
+
+<CodeGroup>
+
+```javascript Node.js
+const HRAPI = require('@hashrails/hr-api-sdk');
+
+const client = new HRAPI({
+  baseUrl: 'https://api.railsfromthecrypt.com', // or 'https://api.hashrails.xyz' for production
+  email: 'your-email@example.com',
+  password: 'your-password'
+});
+
+// Initialize the client
+await client.initialize();
+```
+
+```javascript Browser
+import HRAPI from '@hashrails/hr-api-sdk';
+
+const client = new HRAPI({
+  baseUrl: 'https://api.railsfromthecrypt.com',
+  email: 'your-email@example.com',
+  password: 'your-password'
+});
+
+// Initialize the client
+await client.initialize();
+```
+
+</CodeGroup>
+
+## Authentication
+
+### Login
+
+<CodeGroup>
+
+```javascript Basic Login
+try {
+  const result = await client.auth.login({
+    email: 'user@example.com',
+    password: 'password123'
+  });
+  
+  console.log('Login successful:', result);
+  // Access token is automatically stored
+} catch (error) {
+  console.error('Login failed:', error.message);
+}
+```
+
+```javascript Login with 2FA
+try {
+  const result = await client.auth.login({
+    email: 'user@example.com',
+    password: 'password123'
+  });
+  
+  if (result.requires2FA) {
+    const code = prompt('Enter 2FA code:');
+    const verified = await client.auth.verify2FA(code);
+    console.log('2FA verified:', verified);
+  }
+} catch (error) {
+  console.error('Login failed:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Token Management
+
+<CodeGroup>
+
+```javascript Automatic Token Refresh
+// The SDK automatically handles token refresh
+// No manual intervention required
+
+const client = new HRAPI({
+  baseUrl: 'https://api.railsfromthecrypt.com',
+  accessToken: 'your-access-token',
+  refreshToken: 'your-refresh-token'
+});
+
+// Tokens will be automatically refreshed when needed
+```
+
+```javascript Manual Token Management
+// Get current tokens
+const tokens = client.auth.getTokens();
+console.log('Access token:', tokens.accessToken);
+console.log('Refresh token:', tokens.refreshToken);
+
+// Refresh tokens manually
+try {
+  const newTokens = await client.auth.refresh();
+  console.log('Tokens refreshed:', newTokens);
+} catch (error) {
+  console.error('Token refresh failed:', error.message);
+}
+
+// Logout
+await client.auth.logout();
+```
+
+</CodeGroup>
+
+## Virtual Accounts
+
+### Create Virtual Account Request
+
+<CodeGroup>
+
+```javascript USD Virtual Account
+try {
+  const request = await client.virtualAccounts.createRequest({
+    currency: 'USD',
+    need_new_wallet: false,
+    settlement_id: 'your-settlement-id'
+  });
+  
+  console.log('Virtual account request created:', request);
+  
+  // Check if KYC verification is required
+  if (request.verification_link) {
+    console.log('KYC verification required:', request.verification_link);
+    // Redirect user to complete KYC
+  }
+} catch (error) {
+  console.error('Failed to create virtual account request:', error.message);
+}
+```
+
+```javascript NGN Virtual Account
+try {
+  const request = await client.virtualAccounts.createRequest({
+    currency: 'NGN',
+    need_new_wallet: true
+  });
+  
+  console.log('Virtual account request created:', request);
+} catch (error) {
+  console.error('Failed to create virtual account request:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Get Virtual Account Details
+
+<CodeGroup>
+
+```javascript Get by ID
+try {
+  const account = await client.virtualAccounts.get('account-id');
+  console.log('Virtual account:', account);
+} catch (error) {
+  console.error('Failed to get virtual account:', error.message);
+}
+```
+
+```javascript List All Requests
+try {
+  const requests = await client.virtualAccounts.getRequests({
+    page: 1,
+    limit: 10
+  });
+  
+  console.log('Virtual account requests:', requests);
+} catch (error) {
+  console.error('Failed to get virtual account requests:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Monitor Request Status
+
+<CodeGroup>
+
+```javascript Poll for Status
+async function waitForApproval(requestId) {
+  const maxAttempts = 30; // 5 minutes with 10-second intervals
+  let attempts = 0;
+  
+  while (attempts < maxAttempts) {
+    try {
+      const request = await client.virtualAccounts.getRequest(requestId);
+      
+      if (request.status === 'approved') {
+        console.log('Virtual account approved:', request.virtualAccount);
+        return request;
+      } else if (request.status === 'rejected') {
+        throw new Error(`Request rejected: ${request.failure_reason}`);
+      }
+      
+      // Still pending, wait and retry
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      attempts++;
+    } catch (error) {
+      console.error('Error monitoring request:', error.message);
+      throw error;
+    }
+  }
+  
+  throw new Error('Request monitoring timeout');
+}
+```
+
+</CodeGroup>
+
+## Transactions
+
+### Get Transaction History
+
+<CodeGroup>
+
+```javascript Get All Transactions
+try {
+  const transactions = await client.transactions.list({
+    limit: 20,
+    page: 1
+  });
+  
+  console.log('Transactions:', transactions);
+} catch (error) {
+  console.error('Failed to get transactions:', error.message);
+}
+```
+
+```javascript Get Pending Transactions
+try {
+  const pendingTransactions = await client.transactions.list({
+    status: 'pending',
+    limit: 50
+  });
+  
+  console.log('Pending transactions:', pendingTransactions);
+} catch (error) {
+  console.error('Failed to get pending transactions:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Get Transaction Details
+
+<CodeGroup>
+
+```javascript Get by Reference
+try {
+  const transaction = await client.transactions.getByReference('TXN-1234567890');
+  console.log('Transaction details:', transaction);
+} catch (error) {
+  console.error('Failed to get transaction:', error.message);
+}
+```
+
+```javascript Get by ID
+try {
+  const transaction = await client.transactions.get('transaction-id');
+  console.log('Transaction details:', transaction);
+} catch (error) {
+  console.error('Failed to get transaction:', error.message);
+}
+```
+
+</CodeGroup>
+
+## Transfer Requests
+
+### Create Transfer Request
+
+<CodeGroup>
+
+```javascript Basic Transfer
+try {
+  const transfer = await client.transferRequests.create({
+    amount: '1000.00',
+    currency: 'NGN',
+    rate: '1.2345',
+    pair: 'NGN/USDC',
+    received_amount: '1000.00',
+    fee: '100.00',
+    recipient_id: 'recipient-id'
+  });
+  
+  console.log('Transfer request created:', transfer);
+} catch (error) {
+  console.error('Failed to create transfer request:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Confirm Payment
+
+<CodeGroup>
+
+```javascript Confirm by ID
+try {
+  const confirmed = await client.transferRequests.confirmPayment('transfer-id');
+  console.log('Payment confirmed:', confirmed);
+} catch (error) {
+  console.error('Failed to confirm payment:', error.message);
+}
+```
+
+```javascript Confirm by Reference
+try {
+  const confirmed = await client.transferRequests.confirmPaymentByReference('TXN-1234567890');
+  console.log('Payment confirmed:', confirmed);
+} catch (error) {
+  console.error('Failed to confirm payment:', error.message);
+}
+```
+
+</CodeGroup>
+
+## Recipients
+
+### Create Recipients
+
+<CodeGroup>
+
+```javascript Crypto Recipient
+try {
+  const recipient = await client.recipients.createCrypto({
+    type: 'crypto',
+    wallet_address: '0x1234567890abcdef1234567890abcdef12345678',
+    network: 'Polygon',
+    label: 'Vendor Payment',
+    currency: 'USDC',
+    code: '123456'
+  });
+  
+  console.log('Crypto recipient created:', recipient);
+} catch (error) {
+  console.error('Failed to create crypto recipient:', error.message);
+}
+```
+
+```javascript Fiat Recipient
+try {
+  const recipient = await client.recipients.createFiat({
+    type: 'fiat',
+    account_number: '1234567890',
+    bank_name: 'Bank of America',
+    bank_code: '123',
+    swift_code: 'BOFAUS3N',
+    label: 'Vendor Payment',
+    currency: 'USD',
+    code: '123456'
+  });
+  
+  console.log('Fiat recipient created:', recipient);
+} catch (error) {
+  console.error('Failed to create fiat recipient:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Manage Recipients
+
+<CodeGroup>
+
+```javascript List Recipients
+try {
+  const recipients = await client.recipients.list();
+  console.log('Recipients:', recipients);
+} catch (error) {
+  console.error('Failed to get recipients:', error.message);
+}
+```
+
+```javascript Delete Recipient
+try {
+  const deleted = await client.recipients.delete('recipient-id');
+  console.log('Recipient deleted:', deleted);
+} catch (error) {
+  console.error('Failed to delete recipient:', error.message);
+}
+```
+
+</CodeGroup>
+
+## Rates
+
+### Get Exchange Rates
+
+<CodeGroup>
+
+```javascript Get All Rates
+try {
+  const rates = await client.rates.list();
+  console.log('Exchange rates:', rates);
+} catch (error) {
+  console.error('Failed to get rates:', error.message);
+}
+```
+
+```javascript Calculate Rate
+try {
+  const calculation = await client.rates.calculate({
+    from_currency: 'NGN',
+    to_currency: 'USDC',
+    amount: '50000000',
+    network: 'Polygon'
+  });
+  
+  console.log('Rate calculation:', calculation);
+} catch (error) {
+  console.error('Failed to calculate rate:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Get Supported Currencies
+
+<CodeGroup>
+
+```javascript Get Currencies
+try {
+  const currencies = await client.rates.getCurrencies();
+  console.log('Supported currencies:', currencies);
+} catch (error) {
+  console.error('Failed to get currencies:', error.message);
+}
+```
+
+```javascript Get Networks
+try {
+  const networks = await client.rates.getNetworks();
+  console.log('Supported networks:', networks);
+} catch (error) {
+  console.error('Failed to get networks:', error.message);
+}
+```
+
+</CodeGroup>
+
+## Customers
+
+### Create Customer
+
+<CodeGroup>
+
+```javascript Basic Customer
+try {
+  const customer = await client.customers.create({
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    customer_type: 'individual'
+  });
+  
+  console.log('Customer created:', customer);
+} catch (error) {
+  console.error('Failed to create customer:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Manage Customers
+
+<CodeGroup>
+
+```javascript List Customers
+try {
+  const customers = await client.customers.list({
+    page: 1,
+    limit: 20
+  });
+  
+  console.log('Customers:', customers);
+} catch (error) {
+  console.error('Failed to get customers:', error.message);
+}
+```
+
+```javascript Get Customer Details
+try {
+  const customer = await client.customers.get('customer-id');
+  console.log('Customer details:', customer);
+} catch (error) {
+  console.error('Failed to get customer:', error.message);
+}
+```
+
+</CodeGroup>
+
+## Webhooks
+
+### Set Up Webhook
+
+<CodeGroup>
+
+```javascript Create Webhook
+try {
+  const webhook = await client.webhooks.create({
+    label: 'Production Webhook',
+    url: 'https://your-app.com/webhooks/hr',
+    secret_key: 'your-secret-key',
+    environment: 'live'
+  });
+  
+  console.log('Webhook created:', webhook);
+} catch (error) {
+  console.error('Failed to create webhook:', error.message);
+}
+```
+
+</CodeGroup>
+
+### Test Webhook
+
+<CodeGroup>
+
+```javascript Test Webhook
+try {
+  const result = await client.webhooks.test({
+    reference: 'test-webhook-123',
+    payload: {
+      test: true,
+      timestamp: new Date().toISOString()
+    }
+  });
+  
+  console.log('Webhook test result:', result);
+} catch (error) {
+  console.error('Failed to test webhook:', error.message);
+}
+```
+
+</CodeGroup>
+
+## Error Handling
+
+### Basic Error Handling
+
+<CodeGroup>
+
+```javascript Try-Catch
+try {
+  const result = await client.virtualAccounts.createRequest({
+    currency: 'USD',
+    need_new_wallet: false
+  });
+} catch (error) {
+  if (error.code === 'INVALID_CURRENCY') {
+    console.error('Invalid currency specified');
+  } else if (error.code === 'INSUFFICIENT_PERMISSIONS') {
+    console.error('Insufficient permissions');
+  } else {
+    console.error('Unexpected error:', error.message);
+  }
+}
+```
+
+</CodeGroup>
+
+### Advanced Error Handling
+
+<CodeGroup>
+
+```javascript Error Handler Class
+class ErrorHandler {
+  static handle(error) {
+    switch (error.code) {
+      case 'INVALID_CREDENTIALS':
+        return 'Invalid email or password';
+      case 'TOKEN_EXPIRED':
+        return 'Session expired, please login again';
+      case 'RATE_LIMIT_EXCEEDED':
+        return 'Too many requests, please wait';
+      case 'INSUFFICIENT_PERMISSIONS':
+        return 'You do not have permission to perform this action';
+      case 'RESOURCE_NOT_FOUND':
+        return 'The requested resource was not found';
+      default:
+        return 'An unexpected error occurred';
+    }
+  }
+}
+
+// Usage
+try {
+  const result = await client.virtualAccounts.createRequest(params);
+} catch (error) {
+  const userMessage = ErrorHandler.handle(error);
+  console.error(userMessage);
+}
+```
+
+</CodeGroup>
+
+## Configuration
+
+### Environment Configuration
+
+<CodeGroup>
+
+```javascript Environment Variables
+const client = new HRAPI({
+  baseUrl: process.env.HR_API_BASE_URL || 'https://api.railsfromthecrypt.com',
+  email: process.env.HR_API_EMAIL,
+  password: process.env.HR_API_PASSWORD
+});
+```
+
+```javascript Custom Configuration
+const client = new HRAPI({
+  baseUrl: 'https://api.hashrails.xyz',
+  email: 'your-email@example.com',
+  password: 'your-password',
+  timeout: 30000, // 30 seconds
+  retries: 3,
+  retryDelay: 1000 // 1 second
+});
+```
+
+</CodeGroup>
+
+## Best Practices
+
+### Connection Management
+
+<CodeGroup>
+
+```javascript Singleton Pattern
+class HRAPIClient {
+  constructor() {
+    if (HRAPIClient.instance) {
+      return HRAPIClient.instance;
+    }
+    
+    this.client = new HRAPI({
+      baseUrl: process.env.HR_API_BASE_URL,
+      email: process.env.HR_API_EMAIL,
+      password: process.env.HR_API_PASSWORD
+    });
+    
+    HRAPIClient.instance = this;
+  }
+  
+  async initialize() {
+    if (!this.initialized) {
+      await this.client.initialize();
+      this.initialized = true;
+    }
+  }
+  
+  getClient() {
+    return this.client;
+  }
+}
+
+// Usage
+const apiClient = new HRAPIClient();
+await apiClient.initialize();
+const client = apiClient.getClient();
+```
+
+</CodeGroup>
+
+### Caching
+
+<CodeGroup>
+
+```javascript Simple Cache
+class CacheManager {
+  constructor(ttl = 300000) { // 5 minutes default
+    this.cache = new Map();
+    this.ttl = ttl;
+  }
+  
+  set(key, value) {
+    this.cache.set(key, {
+      value,
+      timestamp: Date.now()
+    });
+  }
+  
+  get(key) {
+    const item = this.cache.get(key);
+    if (!item) return null;
+    
+    if (Date.now() - item.timestamp > this.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    return item.value;
+  }
+  
+  clear() {
+    this.cache.clear();
+  }
+}
+
+// Usage with SDK
+const cache = new CacheManager();
+
+async function getCachedRates() {
+  const cached = cache.get('rates');
+  if (cached) return cached;
+  
+  const rates = await client.rates.list();
+  cache.set('rates', rates);
+  return rates;
+}
+```
+
+</CodeGroup>
+
+### Retry Logic
+
+<CodeGroup>
+
+```javascript Retry Wrapper
+async function withRetry(fn, maxRetries = 3, delay = 1000) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      
+      // Only retry on specific errors
+      if (error.code === 'RATE_LIMIT_EXCEEDED' || error.status >= 500) {
+        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+        continue;
+      }
+      
+      throw error;
+    }
+  }
+}
+
+// Usage
+try {
+  const result = await withRetry(() => 
+    client.virtualAccounts.createRequest(params)
+  );
+} catch (error) {
+  console.error('Failed after retries:', error.message);
+}
+```
+
+</CodeGroup>
+
+## TypeScript Support
+
+The SDK includes full TypeScript support with type definitions:
+
+<CodeGroup>
+
+```typescript TypeScript Example
+import HRAPI, { 
+  VirtualAccountRequest, 
+  Transaction, 
+  Recipient 
+} from '@hashrails/hr-api-sdk';
+
+const client = new HRAPI({
+  baseUrl: 'https://api.railsfromthecrypt.com',
+  email: 'your-email@example.com',
+  password: 'your-password'
+});
+
+async function createVirtualAccount(): Promise<VirtualAccountRequest> {
+  try {
+    const request = await client.virtualAccounts.createRequest({
+      currency: 'USD',
+      need_new_wallet: false,
+      settlement_id: 'settlement-id'
+    });
+    
+    return request;
+  } catch (error) {
+    console.error('Failed to create virtual account:', error);
+    throw error;
+  }
+}
+```
+
+</CodeGroup>
+
+## React Integration
+
+<CodeGroup>
+
+```jsx React Hook
+import { useState, useEffect } from 'react';
+import HRAPI from '@hashrails/hr-api-sdk';
+
+function useHRAPI() {
+  const [client, setClient] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    async function initializeClient() {
+      try {
+        const apiClient = new HRAPI({
+          baseUrl: process.env.REACT_APP_HR_API_BASE_URL,
+          email: process.env.REACT_APP_HR_API_EMAIL,
+          password: process.env.REACT_APP_HR_API_PASSWORD
+        });
+        
+        await apiClient.initialize();
+        setClient(apiClient);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    initializeClient();
+  }, []);
+  
+  return { client, loading, error };
+}
+
+// Usage in component
+function VirtualAccountsList() {
+  const { client, loading, error } = useHRAPI();
+  const [accounts, setAccounts] = useState([]);
+  
+  useEffect(() => {
+    if (client) {
+      client.virtualAccounts.getRequests()
+        .then(setAccounts)
+        .catch(console.error);
+    }
+  }, [client]);
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  
+  return (
+    <div>
+      {accounts.map(account => (
+        <div key={account.id}>
+          {account.reference} - {account.status}
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+</CodeGroup>
+
+## Next.js Integration
+
+<CodeGroup>
+
+```javascript Next.js API Route
+// pages/api/virtual-accounts.js
+import HRAPI from '@hashrails/hr-api-sdk';
+
+const client = new HRAPI({
+  baseUrl: process.env.HR_API_BASE_URL,
+  email: process.env.HR_API_EMAIL,
+  password: process.env.HR_API_PASSWORD
+});
+
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+  
+  try {
+    await client.initialize();
+    const accounts = await client.virtualAccounts.getRequests();
+    
+    res.status(200).json(accounts);
+  } catch (error) {
+    console.error('API Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+```
+
+</CodeGroup>
+
+## Testing
+
+<CodeGroup>
+
+```javascript Jest Tests
+import HRAPI from '@hashrails/hr-api-sdk';
+
+// Mock the SDK
+jest.mock('@hashrails/hr-api-sdk');
+
+describe('HR API Integration', () => {
+  let client;
+  
+  beforeEach(() => {
+    client = new HRAPI({
+      baseUrl: 'https://api.test.com',
+      email: 'test@example.com',
+      password: 'test123'
+    });
+  });
+  
+  test('should create virtual account request', async () => {
+    const mockRequest = {
+      id: 'test-id',
+      reference: 'test-ref',
+      status: 'pending'
+    };
+    
+    client.virtualAccounts.createRequest.mockResolvedValue(mockRequest);
+    
+    const result = await client.virtualAccounts.createRequest({
+      currency: 'USD',
+      need_new_wallet: false
+    });
+    
+    expect(result).toEqual(mockRequest);
+    expect(client.virtualAccounts.createRequest).toHaveBeenCalledWith({
+      currency: 'USD',
+      need_new_wallet: false
+    });
+  });
+});
+```
+
+</CodeGroup>
+
+## Migration Guide
+
+### From REST API to SDK
+
+<CodeGroup>
+
+```javascript Before (REST API)
+// Manual API calls
+const response = await fetch('https://api.railsfromthecrypt.com/v1/virtual-accounts/requests', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer ' + accessToken,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    currency: 'USD',
+    need_new_wallet: false
+  })
+});
+
+const data = await response.json();
+```
+
+```javascript After (SDK)
+// Using SDK
+const request = await client.virtualAccounts.createRequest({
+  currency: 'USD',
+  need_new_wallet: false
+});
+```
+
+</CodeGroup>
+
+## Support
+
+For SDK support and questions:
+
+- **Documentation**: [SDK Documentation](https://docs.hashrails.xyz/sdks/javascript)
+- **GitHub**: [SDK Repository](https://github.com/hashrails/hr-api-sdk-js)
+- **Issues**: [Report Issues](https://github.com/hashrails/hr-api-sdk-js/issues)
+- **Email**: [support@hashrails.xyz](mailto:support@hashrails.xyz)

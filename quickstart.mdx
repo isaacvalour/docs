@@ -1,0 +1,406 @@
+---
+title: "Quick Start"
+description: "Get up and running with HR API in minutes"
+---
+
+## Overview
+
+This quickstart guide will help you make your first API call to HR API in just a few minutes. We'll walk you through authentication, making a basic request, and understanding the response.
+
+<Steps>
+  <Step title="Get API Credentials">
+    Contact our team to get your API credentials. You'll receive:
+    - Email and password for authentication
+    - Access to our staging environment
+  </Step>
+  <Step title="Authenticate">
+    Use the login endpoint to get your access token
+  </Step>
+  <Step title="Make Your First Request">
+    Test the health check endpoint to verify connectivity
+  </Step>
+  <Step title="Explore the API">
+    Try other endpoints using our interactive documentation
+  </Step>
+</Steps>
+
+## Step 1: Authentication
+
+First, you need to authenticate to get an access token. Use the login endpoint:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "your-email@example.com",
+    "password": "your-password"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'your-email@example.com',
+    password: 'your-password'
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/auth/login',
+    json={
+        'email': 'your-email@example.com',
+        'password': 'your-password'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Response
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 7200,
+  "is_2fa_enabled": false
+}
+```
+
+</ResponseExample>
+
+<Warning>
+Save your access token securely. It expires after 2 hours, and you'll need to use the refresh token to get a new one.
+</Warning>
+
+## Step 2: Make Your First Request
+
+Now let's test the health check endpoint to verify your connection:
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET https://api.railsfromthecrypt.com/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.railsfromthecrypt.com/',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Response
+{
+  "status": true,
+  "service": "HR service"
+}
+```
+
+</ResponseExample>
+
+## Step 3: Get Your Profile
+
+Let's get your user profile information:
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET https://api.railsfromthecrypt.com/v1/users/me \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/users/me', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.railsfromthecrypt.com/v1/users/me',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Response
+{
+  "full_name": "John Doe",
+  "email": "john@example.com",
+  "phone_number": "+1234567890",
+  "country": "United States",
+  "require_password_change": false,
+  "level": 10,
+  "created_at": 1703123456789
+}
+```
+
+</ResponseExample>
+
+## Step 4: Create Your First Client
+
+Now let's create a business client:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/client \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "company_name": "Acme Corp",
+    "company_email": "contact@acme.com",
+    "company_phone_number": "+1234567890",
+    "company_country": "US"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/client', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    company_name: 'Acme Corp',
+    company_email: 'contact@acme.com',
+    company_phone_number: '+1234567890',
+    company_country: 'US'
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/client',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'company_name': 'Acme Corp',
+        'company_email': 'contact@acme.com',
+        'company_phone_number': '+1234567890',
+        'company_country': 'US'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+</CodeGroup>
+
+## Step 5: Get Exchange Rates
+
+Let's check available exchange rates:
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET https://api.railsfromthecrypt.com/v1/rates \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/rates', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.railsfromthecrypt.com/v1/rates',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+</CodeGroup>
+
+## Next Steps
+
+Congratulations! You've successfully made your first API calls. Here's what you can do next:
+
+<CardGroup cols={2}>
+  <Card
+    title="Explore Virtual Accounts"
+    icon="credit-card"
+    href="/guides/virtual-accounts"
+  >
+    Learn how to create and manage virtual accounts for receiving payments
+  </Card>
+  <Card
+    title="Set Up Webhooks"
+    icon="webhook"
+    href="/concepts/webhooks"
+  >
+    Configure real-time notifications for your application
+  </Card>
+  <Card
+    title="Create Customers"
+    icon="users"
+    href="/guides/customers"
+  >
+    Learn how to onboard and manage customers with KYC verification
+  </Card>
+  <Card
+    title="Process Transactions"
+    icon="exchange-alt"
+    href="/guides/transactions"
+  >
+    Handle financial transactions and transfers
+  </Card>
+</CardGroup>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="Authentication Errors">
+    **401 Unauthorized**: Check that your access token is valid and not expired. Use the refresh token endpoint to get a new access token.
+    
+    **403 Forbidden**: Your user account may not have sufficient permissions for the requested operation.
+  </Accordion>
+  <Accordion title="Rate Limiting">
+    **429 Too Many Requests**: You've exceeded the rate limit. Wait for the reset time indicated in the response headers before making more requests.
+  </Accordion>
+  <Accordion title="Network Issues">
+    **Connection Timeout**: Check your internet connection and ensure you're using the correct base URL for your environment.
+  </Accordion>
+</AccordionGroup>
+
+## Environment Variables
+
+For production applications, use environment variables to store your credentials:
+
+<CodeGroup>
+
+```bash .env
+HR_API_BASE_URL=https://api.hashrails.xyz
+HR_API_EMAIL=your-email@example.com
+HR_API_PASSWORD=your-password
+HR_ACCESS_TOKEN=your-access-token
+```
+
+```javascript JavaScript
+const config = {
+  baseUrl: process.env.HR_API_BASE_URL,
+  email: process.env.HR_API_EMAIL,
+  password: process.env.HR_API_PASSWORD,
+  accessToken: process.env.HR_ACCESS_TOKEN
+};
+```
+
+```python Python
+import os
+
+config = {
+    'base_url': os.getenv('HR_API_BASE_URL'),
+    'email': os.getenv('HR_API_EMAIL'),
+    'password': os.getenv('HR_API_PASSWORD'),
+    'access_token': os.getenv('HR_ACCESS_TOKEN')
+}
+```
+
+</CodeGroup>
+
+<Warning>
+Never commit API credentials to version control. Use environment variables or secure credential management systems.
+</Warning>
+
+## Need Help?
+
+If you run into any issues:
+
+1. Check our [error handling guide](/concepts/error-handling) for common error codes
+2. Review the [API reference](/api/auth/login) for detailed endpoint documentation
+3. Contact our support team at [support@hashrails.xyz](mailto:support@hashrails.xyz)
+
+<CardGroup cols={2}>
+  <Card
+    title="API Reference"
+    icon="book"
+    href="/api/auth/login"
+  >
+    Complete documentation for all endpoints
+  </Card>
+  <Card
+    title="Support"
+    icon="headset"
+    href="mailto:support@hashrails.xyz"
+  >
+    Get help from our support team
+  </Card>
+</CardGroup>

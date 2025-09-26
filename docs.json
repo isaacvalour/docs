@@ -1,0 +1,316 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "HR API Documentation",
+  "colors": {
+    "primary": "#00ff00",
+    "light": "#49b648",
+    "dark": "#00cd00"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "index",
+              "quickstart",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/overview",
+              "concepts/rate-limiting",
+              "concepts/webhooks",
+              "concepts/error-handling"
+            ]
+          },
+          {
+            "group": "Integration Guides",
+            "pages": [
+              "guides/virtual-accounts",
+              "guides/transactions",
+              "guides/customers",
+              "guides/recipients"
+            ]
+          },
+          {
+            "group": "SDKs & Examples",
+            "pages": [
+              "sdks/javascript",
+              "sdks/python",
+              "sdks/curl-examples"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/auth/login",
+              "api/auth/register",
+              "api/auth/logout",
+              "api/auth/refresh",
+              "api/auth/verify-email",
+              "api/auth/set-password",
+              "api/auth/forgot-password",
+              "api/auth/reset-password",
+              "api/auth/verify-2fa"
+            ]
+          },
+          {
+            "group": "System",
+            "pages": [
+              "api/system/health",
+              "api/system/limit-check",
+              "api/system/teardown"
+            ]
+          },
+          {
+            "group": "Users",
+            "pages": [
+              "api/users/create",
+              "api/users/update",
+              "api/users/me",
+              "api/users/profile"
+            ]
+          },
+          {
+            "group": "2FA",
+            "pages": [
+              "api/2fa/qrcode",
+              "api/2fa/enable"
+            ]
+          },
+          {
+            "group": "Onboarding",
+            "pages": [
+              "api/onboard/create",
+              "api/onboard/link"
+            ]
+          },
+          {
+            "group": "Clients",
+            "pages": [
+              "api/client/create",
+              "api/client/kyb/token",
+              "api/client/kyb/link",
+              "api/client/kyb/status",
+              "api/client/kyb/documents"
+            ]
+          },
+          {
+            "group": "Virtual Accounts",
+            "pages": [
+              "api/virtual-accounts/requests",
+              "api/virtual-accounts/request/account",
+              "api/virtual-accounts/requests/process",
+              "api/virtual-accounts/suspend",
+              "api/virtual-accounts/metrics",
+              "api/virtual-accounts/get",
+              "api/virtual-accounts/activities"
+            ]
+          },
+          {
+            "group": "Customers",
+            "pages": [
+              "api/customers/create",
+              "api/customers/list",
+              "api/customers/get",
+              "api/customers/verification-tasks"
+            ]
+          },
+          {
+            "group": "Transactions",
+            "pages": [
+              "api/transactions/list",
+              "api/transactions/create",
+              "api/transactions/get-by-reference",
+              "api/transactions/get-by-id",
+              "api/transactions/update",
+              "api/transactions/cancel",
+              "api/transactions/retry"
+            ]
+          },
+          {
+            "group": "Recipients",
+            "pages": [
+              "api/recipients/fiat",
+              "api/recipients/crypto",
+              "api/recipients/list",
+              "api/recipients/get",
+              "api/recipients/delete"
+            ]
+          },
+          {
+            "group": "Rates",
+            "pages": [
+              "api/rates/list",
+              "api/rates/currencies",
+              "api/rates/networks",
+              "api/rates/calculator"
+            ]
+          },
+          {
+            "group": "Transfer Requests",
+            "pages": [
+              "api/transfer-requests/create",
+              "api/transfer-requests/list",
+              "api/transfer-requests/get",
+              "api/transfer-requests/confirm-payment"
+            ]
+          },
+          {
+            "group": "API Keys",
+            "pages": [
+              "api/api-keys/list",
+              "api/api-keys/create",
+              "api/api-keys/get",
+              "api/api-keys/update-label",
+              "api/api-keys/delete",
+              "api/api-keys/logs"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api/webhooks/create",
+              "api/webhooks/get",
+              "api/webhooks/update",
+              "api/webhooks/test",
+              "api/webhooks/logs",
+              "api/webhooks/resend",
+              "api/webhooks/status"
+            ]
+          },
+          {
+            "group": "IP Whitelist",
+            "pages": [
+              "api/ips/create",
+              "api/ips/list",
+              "api/ips/get",
+              "api/ips/update",
+              "api/ips/delete"
+            ]
+          },
+          {
+            "group": "Notifications",
+            "pages": [
+              "api/notifications/list",
+              "api/notifications/count",
+              "api/notifications/mark-read"
+            ]
+          },
+          {
+            "group": "Landing Forms",
+            "pages": [
+              "api/landing/demo",
+              "api/landing/career"
+            ]
+          },
+          {
+            "group": "WebSocket Health",
+            "pages": [
+              "api/websocket/health",
+              "api/websocket/connections",
+              "api/websocket/subscriptions"
+            ]
+          },
+          {
+            "group": "Provider Webhooks",
+            "pages": [
+              "api/providers/nomba",
+              "api/providers/bridge",
+              "api/providers/juicyway",
+              "api/providers/alatpay",
+              "api/providers/sumsub"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Dashboard",
+          "href": "https://dashboard.hashrails.xyz",
+          "icon": "chart-line"
+        },
+        {
+          "anchor": "Support",
+          "href": "mailto:support@hashrails.xyz",
+          "icon": "headset"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "https://dashboard.hashrails.xyz/images/hashrails-logo.svg",
+    "dark": "https://dashboard.hashrails.xyz/images/hashrails-logo.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Status",
+        "href": "https://status.hashrails.xyz"
+      },
+      {
+        "label": "Support",
+        "href": "mailto:support@hashrails.xyz"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get Started",
+      "href": "https://docs.hashrails.xyz/quickstart"
+    }
+  },
+  "contextual": {
+    "options": [
+     "copy",
+     "view",
+     "chatgpt",
+     "claude",
+     "perplexity",
+     "mcp",
+     "cursor",
+     "vscode"
+   ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/hashrails",
+      "github": "https://github.com/hashrails",
+      "linkedin": "https://linkedin.com/company/hashrails"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.mitulabs.xyz/v1"
+    },
+    {
+      "url": "https://local-gateway.mitulabs.xyz/v1"
+    }
+  ],
+  "security": [
+    {
+      "apiKey": []
+    }
+  ],
+ "api": {
+		"mdx":{
+			"server": "https://railsfromthecrypt.com/"
+		},
+    "auth": {
+      "method": "bearer"
+    }
+  }
+}

@@ -1,0 +1,1007 @@
+---
+title: "Python SDK"
+description: "Complete Python SDK for HR API with examples and best practices"
+---
+
+## Installation
+
+Install the HR API Python SDK using pip:
+
+```bash
+pip install hr-api-sdk
+```
+
+Or using poetry:
+
+```bash
+poetry add hr-api-sdk
+```
+
+## Basic Setup
+
+<CodeGroup>
+
+```python Basic Setup
+from hr_api import HRAPIClient
+
+client = HRAPIClient(
+    base_url='https://api.railsfromthecrypt.com',  # or 'https://api.hashrails.xyz' for production
+    email='your-email@example.com',
+    password='your-password'
+)
+
+# Initialize the client
+await client.initialize()
+```
+
+```python AsyncIO Setup
+import asyncio
+from hr_api import AsyncHRAPIClient
+
+async def main():
+    client = AsyncHRAPIClient(
+        base_url='https://api.railsfromthecrypt.com',
+        email='your-email@example.com',
+        password='your-password'
+    )
+    
+    await client.initialize()
+    return client
+
+# Run the async function
+client = asyncio.run(main())
+```
+
+</CodeGroup>
+
+## Authentication
+
+### Login
+
+<CodeGroup>
+
+```python Basic Login
+try:
+    result = client.auth.login(
+        email='user@example.com',
+        password='password123'
+    )
+    print('Login successful:', result)
+    # Access token is automatically stored
+except Exception as error:
+    print('Login failed:', str(error))
+```
+
+```python Login with 2FA
+try:
+    result = client.auth.login(
+        email='user@example.com',
+        password='password123'
+    )
+    
+    if result.requires_2fa:
+        code = input('Enter 2FA code: ')
+        verified = client.auth.verify_2fa(code)
+        print('2FA verified:', verified)
+except Exception as error:
+    print('Login failed:', str(error))
+```
+
+</CodeGroup>
+
+### Token Management
+
+<CodeGroup>
+
+```python Automatic Token Refresh
+# The SDK automatically handles token refresh
+# No manual intervention required
+
+client = HRAPIClient(
+    base_url='https://api.railsfromthecrypt.com',
+    access_token='your-access-token',
+    refresh_token='your-refresh-token'
+)
+
+# Tokens will be automatically refreshed when needed
+```
+
+```python Manual Token Management
+# Get current tokens
+tokens = client.auth.get_tokens()
+print('Access token:', tokens.access_token)
+print('Refresh token:', tokens.refresh_token)
+
+# Refresh tokens manually
+try:
+    new_tokens = client.auth.refresh()
+    print('Tokens refreshed:', new_tokens)
+except Exception as error:
+    print('Token refresh failed:', str(error))
+
+# Logout
+client.auth.logout()
+```
+
+</CodeGroup>
+
+## Virtual Accounts
+
+### Create Virtual Account Request
+
+<CodeGroup>
+
+```python USD Virtual Account
+try:
+    request = client.virtual_accounts.create_request(
+        currency='USD',
+        need_new_wallet=False,
+        settlement_id='your-settlement-id'
+    )
+    
+    print('Virtual account request created:', request)
+    
+    # Check if KYC verification is required
+    if request.verification_link:
+        print('KYC verification required:', request.verification_link)
+        # Redirect user to complete KYC
+except Exception as error:
+    print('Failed to create virtual account request:', str(error))
+```
+
+```python NGN Virtual Account
+try:
+    request = client.virtual_accounts.create_request(
+        currency='NGN',
+        need_new_wallet=True
+    )
+    
+    print('Virtual account request created:', request)
+except Exception as error:
+    print('Failed to create virtual account request:', str(error))
+```
+
+</CodeGroup>
+
+### Get Virtual Account Details
+
+<CodeGroup>
+
+```python Get by ID
+try:
+    account = client.virtual_accounts.get('account-id')
+    print('Virtual account:', account)
+except Exception as error:
+    print('Failed to get virtual account:', str(error))
+```
+
+```python List All Requests
+try:
+    requests = client.virtual_accounts.get_requests(
+        page=1,
+        limit=10
+    )
+    
+    print('Virtual account requests:', requests)
+except Exception as error:
+    print('Failed to get virtual account requests:', str(error))
+```
+
+</CodeGroup>
+
+### Monitor Request Status
+
+<CodeGroup>
+
+```python Poll for Status
+import time
+
+async def wait_for_approval(request_id):
+    max_attempts = 30  # 5 minutes with 10-second intervals
+    attempts = 0
+    
+    while attempts < max_attempts:
+        try:
+            request = client.virtual_accounts.get_request(request_id)
+            
+            if request.status == 'approved':
+                print('Virtual account approved:', request.virtual_account)
+                return request
+            elif request.status == 'rejected':
+                raise Exception(f'Request rejected: {request.failure_reason}')
+            
+            # Still pending, wait and retry
+            time.sleep(10)
+            attempts += 1
+        except Exception as error:
+            print('Error monitoring request:', str(error))
+            raise error
+    
+    raise Exception('Request monitoring timeout')
+```
+
+</CodeGroup>
+
+## Transactions
+
+### Get Transaction History
+
+<CodeGroup>
+
+```python Get All Transactions
+try:
+    transactions = client.transactions.list(
+        limit=20,
+        page=1
+    )
+    
+    print('Transactions:', transactions)
+except Exception as error:
+    print('Failed to get transactions:', str(error))
+```
+
+```python Get Pending Transactions
+try:
+    pending_transactions = client.transactions.list(
+        status='pending',
+        limit=50
+    )
+    
+    print('Pending transactions:', pending_transactions)
+except Exception as error:
+    print('Failed to get pending transactions:', str(error))
+```
+
+</CodeGroup>
+
+### Get Transaction Details
+
+<CodeGroup>
+
+```python Get by Reference
+try:
+    transaction = client.transactions.get_by_reference('TXN-1234567890')
+    print('Transaction details:', transaction)
+except Exception as error:
+    print('Failed to get transaction:', str(error))
+```
+
+```python Get by ID
+try:
+    transaction = client.transactions.get('transaction-id')
+    print('Transaction details:', transaction)
+except Exception as error:
+    print('Failed to get transaction:', str(error))
+```
+
+</CodeGroup>
+
+## Transfer Requests
+
+### Create Transfer Request
+
+<CodeGroup>
+
+```python Basic Transfer
+try:
+    transfer = client.transfer_requests.create(
+        amount='1000.00',
+        currency='NGN',
+        rate='1.2345',
+        pair='NGN/USDC',
+        received_amount='1000.00',
+        fee='100.00',
+        recipient_id='recipient-id'
+    )
+    
+    print('Transfer request created:', transfer)
+except Exception as error:
+    print('Failed to create transfer request:', str(error))
+```
+
+</CodeGroup>
+
+### Confirm Payment
+
+<CodeGroup>
+
+```python Confirm by ID
+try:
+    confirmed = client.transfer_requests.confirm_payment('transfer-id')
+    print('Payment confirmed:', confirmed)
+except Exception as error:
+    print('Failed to confirm payment:', str(error))
+```
+
+```python Confirm by Reference
+try:
+    confirmed = client.transfer_requests.confirm_payment_by_reference('TXN-1234567890')
+    print('Payment confirmed:', confirmed)
+except Exception as error:
+    print('Failed to confirm payment:', str(error))
+```
+
+</CodeGroup>
+
+## Recipients
+
+### Create Recipients
+
+<CodeGroup>
+
+```python Crypto Recipient
+try:
+    recipient = client.recipients.create_crypto(
+        type='crypto',
+        wallet_address='0x1234567890abcdef1234567890abcdef12345678',
+        network='Polygon',
+        label='Vendor Payment',
+        currency='USDC',
+        code='123456'
+    )
+    
+    print('Crypto recipient created:', recipient)
+except Exception as error:
+    print('Failed to create crypto recipient:', str(error))
+```
+
+```python Fiat Recipient
+try:
+    recipient = client.recipients.create_fiat(
+        type='fiat',
+        account_number='1234567890',
+        bank_name='Bank of America',
+        bank_code='123',
+        swift_code='BOFAUS3N',
+        label='Vendor Payment',
+        currency='USD',
+        code='123456'
+    )
+    
+    print('Fiat recipient created:', recipient)
+except Exception as error:
+    print('Failed to create fiat recipient:', str(error))
+```
+
+</CodeGroup>
+
+### Manage Recipients
+
+<CodeGroup>
+
+```python List Recipients
+try:
+    recipients = client.recipients.list()
+    print('Recipients:', recipients)
+except Exception as error:
+    print('Failed to get recipients:', str(error))
+```
+
+```python Delete Recipient
+try:
+    deleted = client.recipients.delete('recipient-id')
+    print('Recipient deleted:', deleted)
+except Exception as error:
+    print('Failed to delete recipient:', str(error))
+```
+
+</CodeGroup>
+
+## Rates
+
+### Get Exchange Rates
+
+<CodeGroup>
+
+```python Get All Rates
+try:
+    rates = client.rates.list()
+    print('Exchange rates:', rates)
+except Exception as error:
+    print('Failed to get rates:', str(error))
+```
+
+```python Calculate Rate
+try:
+    calculation = client.rates.calculate(
+        from_currency='NGN',
+        to_currency='USDC',
+        amount='50000000',
+        network='Polygon'
+    )
+    
+    print('Rate calculation:', calculation)
+except Exception as error:
+    print('Failed to calculate rate:', str(error))
+```
+
+</CodeGroup>
+
+### Get Supported Currencies
+
+<CodeGroup>
+
+```python Get Currencies
+try:
+    currencies = client.rates.get_currencies()
+    print('Supported currencies:', currencies)
+except Exception as error:
+    print('Failed to get currencies:', str(error))
+```
+
+```python Get Networks
+try:
+    networks = client.rates.get_networks()
+    print('Supported networks:', networks)
+except Exception as error:
+    print('Failed to get networks:', str(error))
+```
+
+</CodeGroup>
+
+## Customers
+
+### Create Customer
+
+<CodeGroup>
+
+```python Basic Customer
+try:
+    customer = client.customers.create(
+        name='John Doe',
+        email='john.doe@example.com',
+        customer_type='individual'
+    )
+    
+    print('Customer created:', customer)
+except Exception as error:
+    print('Failed to create customer:', str(error))
+```
+
+</CodeGroup>
+
+### Manage Customers
+
+<CodeGroup>
+
+```python List Customers
+try:
+    customers = client.customers.list(
+        page=1,
+        limit=20
+    )
+    
+    print('Customers:', customers)
+except Exception as error:
+    print('Failed to get customers:', str(error))
+```
+
+```python Get Customer Details
+try:
+    customer = client.customers.get('customer-id')
+    print('Customer details:', customer)
+except Exception as error:
+    print('Failed to get customer:', str(error))
+```
+
+</CodeGroup>
+
+## Webhooks
+
+### Set Up Webhook
+
+<CodeGroup>
+
+```python Create Webhook
+try:
+    webhook = client.webhooks.create(
+        label='Production Webhook',
+        url='https://your-app.com/webhooks/hr',
+        secret_key='your-secret-key',
+        environment='live'
+    )
+    
+    print('Webhook created:', webhook)
+except Exception as error:
+    print('Failed to create webhook:', str(error))
+```
+
+</CodeGroup>
+
+### Test Webhook
+
+<CodeGroup>
+
+```python Test Webhook
+try:
+    result = client.webhooks.test(
+        reference='test-webhook-123',
+        payload={
+            'test': True,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+    )
+    
+    print('Webhook test result:', result)
+except Exception as error:
+    print('Failed to test webhook:', str(error))
+```
+
+</CodeGroup>
+
+## Error Handling
+
+### Basic Error Handling
+
+<CodeGroup>
+
+```python Try-Except
+try:
+    result = client.virtual_accounts.create_request(
+        currency='USD',
+        need_new_wallet=False
+    )
+except HRAPIError as error:
+    if error.code == 'INVALID_CURRENCY':
+        print('Invalid currency specified')
+    elif error.code == 'INSUFFICIENT_PERMISSIONS':
+        print('Insufficient permissions')
+    else:
+        print('Unexpected error:', str(error))
+```
+
+</CodeGroup>
+
+### Advanced Error Handling
+
+<CodeGroup>
+
+```python Error Handler Class
+class ErrorHandler:
+    @staticmethod
+    def handle(error):
+        error_messages = {
+            'INVALID_CREDENTIALS': 'Invalid email or password',
+            'TOKEN_EXPIRED': 'Session expired, please login again',
+            'RATE_LIMIT_EXCEEDED': 'Too many requests, please wait',
+            'INSUFFICIENT_PERMISSIONS': 'You do not have permission to perform this action',
+            'RESOURCE_NOT_FOUND': 'The requested resource was not found'
+        }
+        
+        return error_messages.get(error.code, 'An unexpected error occurred')
+
+# Usage
+try:
+    result = client.virtual_accounts.create_request(params)
+except HRAPIError as error:
+    user_message = ErrorHandler.handle(error)
+    print(user_message)
+```
+
+</CodeGroup>
+
+## Configuration
+
+### Environment Configuration
+
+<CodeGroup>
+
+```python Environment Variables
+import os
+
+client = HRAPIClient(
+    base_url=os.getenv('HR_API_BASE_URL', 'https://api.railsfromthecrypt.com'),
+    email=os.getenv('HR_API_EMAIL'),
+    password=os.getenv('HR_API_PASSWORD')
+)
+```
+
+```python Custom Configuration
+client = HRAPIClient(
+    base_url='https://api.hashrails.xyz',
+    email='your-email@example.com',
+    password='your-password',
+    timeout=30,  # 30 seconds
+    retries=3,
+    retry_delay=1  # 1 second
+)
+```
+
+</CodeGroup>
+
+## Best Practices
+
+### Connection Management
+
+<CodeGroup>
+
+```python Singleton Pattern
+class HRAPIClientManager:
+    _instance = None
+    _client = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    def __init__(self):
+        if self._client is None:
+            self._client = HRAPIClient(
+                base_url=os.getenv('HR_API_BASE_URL'),
+                email=os.getenv('HR_API_EMAIL'),
+                password=os.getenv('HR_API_PASSWORD')
+            )
+    
+    async def initialize(self):
+        if not hasattr(self, '_initialized'):
+            await self._client.initialize()
+            self._initialized = True
+    
+    def get_client(self):
+        return self._client
+
+# Usage
+api_manager = HRAPIClientManager()
+await api_manager.initialize()
+client = api_manager.get_client()
+```
+
+</CodeGroup>
+
+### Caching
+
+<CodeGroup>
+
+```python Simple Cache
+import time
+from typing import Any, Optional
+
+class CacheManager:
+    def __init__(self, ttl: int = 300):  # 5 minutes default
+        self.cache = {}
+        self.ttl = ttl
+    
+    def set(self, key: str, value: Any) -> None:
+        self.cache[key] = {
+            'value': value,
+            'timestamp': time.time()
+        }
+    
+    def get(self, key: str) -> Optional[Any]:
+        item = self.cache.get(key)
+        if not item:
+            return None
+        
+        if time.time() - item['timestamp'] > self.ttl:
+            del self.cache[key]
+            return None
+        
+        return item['value']
+    
+    def clear(self) -> None:
+        self.cache.clear()
+
+# Usage with SDK
+cache = CacheManager()
+
+async def get_cached_rates():
+    cached = cache.get('rates')
+    if cached:
+        return cached
+    
+    rates = await client.rates.list()
+    cache.set('rates', rates)
+    return rates
+```
+
+</CodeGroup>
+
+### Retry Logic
+
+<CodeGroup>
+
+```python Retry Decorator
+import asyncio
+from functools import wraps
+
+def with_retry(max_retries: int = 3, delay: float = 1.0):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            for i in range(max_retries):
+                try:
+                    return await func(*args, **kwargs)
+                except HRAPIError as error:
+                    if i == max_retries - 1:
+                        raise error
+                    
+                    # Only retry on specific errors
+                    if error.code == 'RATE_LIMIT_EXCEEDED' or error.status >= 500:
+                        await asyncio.sleep(delay * (2 ** i))
+                        continue
+                    
+                    raise error
+            return None
+        return wrapper
+    return decorator
+
+# Usage
+@with_retry(max_retries=3, delay=1.0)
+async def create_virtual_account(params):
+    return await client.virtual_accounts.create_request(params)
+
+try:
+    result = await create_virtual_account(params)
+except HRAPIError as error:
+    print('Failed after retries:', str(error))
+```
+
+</CodeGroup>
+
+## Type Hints
+
+The SDK includes full type hints for better development experience:
+
+<CodeGroup>
+
+```python Type Hints Example
+from typing import List, Optional
+from hr_api import HRAPIClient, VirtualAccountRequest, Transaction
+
+async def create_virtual_account(
+    client: HRAPIClient,
+    currency: str,
+    settlement_id: Optional[str] = None
+) -> VirtualAccountRequest:
+    try:
+        request = await client.virtual_accounts.create_request(
+            currency=currency,
+            need_new_wallet=False,
+            settlement_id=settlement_id
+        )
+        return request
+    except Exception as error:
+        print(f'Failed to create virtual account: {error}')
+        raise error
+
+async def get_transactions(
+    client: HRAPIClient,
+    status: Optional[str] = None,
+    limit: int = 10
+) -> List[Transaction]:
+    try:
+        transactions = await client.transactions.list(
+            status=status,
+            limit=limit
+        )
+        return transactions
+    except Exception as error:
+        print(f'Failed to get transactions: {error}')
+        raise error
+```
+
+</CodeGroup>
+
+## Django Integration
+
+<CodeGroup>
+
+```python Django Settings
+# settings.py
+HR_API_BASE_URL = 'https://api.hashrails.xyz'
+HR_API_EMAIL = 'your-email@example.com'
+HR_API_PASSWORD = 'your-password'
+```
+
+```python Django Service
+# services.py
+from django.conf import settings
+from hr_api import HRAPIClient
+
+class HRAPIService:
+    _client = None
+    
+    @classmethod
+    def get_client(cls):
+        if cls._client is None:
+            cls._client = HRAPIClient(
+                base_url=settings.HR_API_BASE_URL,
+                email=settings.HR_API_EMAIL,
+                password=settings.HR_API_PASSWORD
+            )
+        return cls._client
+    
+    @classmethod
+    async def create_virtual_account(cls, currency: str):
+        client = cls.get_client()
+        return await client.virtual_accounts.create_request(
+            currency=currency,
+            need_new_wallet=True
+        )
+```
+
+```python Django View
+# views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .services import HRAPIService
+
+@csrf_exempt
+async def create_virtual_account(request):
+    if request.method == 'POST':
+        try:
+            currency = request.POST.get('currency', 'NGN')
+            account = await HRAPIService.create_virtual_account(currency)
+            return JsonResponse({'success': True, 'data': account})
+        except Exception as error:
+            return JsonResponse({'success': False, 'error': str(error)})
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+```
+
+</CodeGroup>
+
+## Flask Integration
+
+<CodeGroup>
+
+```python Flask App
+from flask import Flask, request, jsonify
+from hr_api import HRAPIClient
+import os
+
+app = Flask(__name__)
+
+# Initialize client
+client = HRAPIClient(
+    base_url=os.getenv('HR_API_BASE_URL'),
+    email=os.getenv('HR_API_EMAIL'),
+    password=os.getenv('HR_API_PASSWORD')
+)
+
+@app.before_first_request
+async def initialize_client():
+    await client.initialize()
+
+@app.route('/virtual-accounts', methods=['POST'])
+async def create_virtual_account():
+    try:
+        data = request.get_json()
+        currency = data.get('currency', 'NGN')
+        
+        account = await client.virtual_accounts.create_request(
+            currency=currency,
+            need_new_wallet=True
+        )
+        
+        return jsonify({'success': True, 'data': account})
+    except Exception as error:
+        return jsonify({'success': False, 'error': str(error)}), 500
+
+@app.route('/transactions', methods=['GET'])
+async def get_transactions():
+    try:
+        status = request.args.get('status')
+        limit = int(request.args.get('limit', 10))
+        
+        transactions = await client.transactions.list(
+            status=status,
+            limit=limit
+        )
+        
+        return jsonify({'success': True, 'data': transactions})
+    except Exception as error:
+        return jsonify({'success': False, 'error': str(error)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+</CodeGroup>
+
+## Testing
+
+<CodeGroup>
+
+```python Pytest Tests
+import pytest
+from unittest.mock import AsyncMock, patch
+from hr_api import HRAPIClient, HRAPIError
+
+@pytest.fixture
+def client():
+    return HRAPIClient(
+        base_url='https://api.test.com',
+        email='test@example.com',
+        password='test123'
+    )
+
+@pytest.mark.asyncio
+async def test_create_virtual_account_request(client):
+    # Mock the API response
+    mock_request = {
+        'id': 'test-id',
+        'reference': 'test-ref',
+        'status': 'pending'
+    }
+    
+    with patch.object(client.virtual_accounts, 'create_request', 
+                     new_callable=AsyncMock) as mock_create:
+        mock_create.return_value = mock_request
+        
+        result = await client.virtual_accounts.create_request(
+            currency='USD',
+            need_new_wallet=False
+        )
+        
+        assert result == mock_request
+        mock_create.assert_called_once_with(
+            currency='USD',
+            need_new_wallet=False
+        )
+
+@pytest.mark.asyncio
+async def test_handle_api_error(client):
+    with patch.object(client.virtual_accounts, 'create_request', 
+                     new_callable=AsyncMock) as mock_create:
+        mock_create.side_effect = HRAPIError(
+            message='Invalid currency',
+            code='INVALID_CURRENCY',
+            status=400
+        )
+        
+        with pytest.raises(HRAPIError) as exc_info:
+            await client.virtual_accounts.create_request(
+                currency='INVALID',
+                need_new_wallet=False
+            )
+        
+        assert exc_info.value.code == 'INVALID_CURRENCY'
+```
+
+</CodeGroup>
+
+## Migration Guide
+
+### From REST API to SDK
+
+<CodeGroup>
+
+```python Before (REST API)
+import requests
+
+# Manual API calls
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/virtual-accounts/requests',
+    headers={
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'currency': 'USD',
+        'need_new_wallet': False
+    }
+)
+
+data = response.json()
+```
+
+```python After (SDK)
+# Using SDK
+request = await client.virtual_accounts.create_request(
+    currency='USD',
+    need_new_wallet=False
+)
+```
+
+</CodeGroup>
+
+## Support
+
+For SDK support and questions:
+
+- **Documentation**: [SDK Documentation](https://docs.hashrails.xyz/sdks/python)
+- **GitHub**: [SDK Repository](https://github.com/hashrails/hr-api-sdk-python)
+- **Issues**: [Report Issues](https://github.com/hashrails/hr-api-sdk-python/issues)
+- **Email**: [support@hashrails.xyz](mailto:support@hashrails.xyz)

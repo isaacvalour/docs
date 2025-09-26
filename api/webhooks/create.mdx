@@ -1,0 +1,138 @@
+---
+title: "Create Webhook"
+api: "POST /v1/webhooks"
+description: "Create a new webhook endpoint for receiving events"
+---
+
+## Overview
+
+Create a new webhook endpoint to receive real-time notifications about events in your account.
+
+<Note>
+Webhooks are sent via HTTP POST requests to your specified URL. Ensure your endpoint can handle POST requests and responds with a 2xx status code.
+</Note>
+
+## Request Body
+
+<ParamField body="url" type="string" required>
+  URL where webhook events will be sent
+</ParamField>
+
+<ParamField body="events" type="array" required>
+  Array of event types to subscribe to
+</ParamField>
+
+<ParamField body="secret" type="string">
+  Secret key for webhook signature verification
+</ParamField>
+
+<ParamField body="description" type="string">
+  Optional description for the webhook
+</ParamField>
+
+<ParamField body="active" type="boolean">
+  Whether the webhook is active (default: true)
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique identifier for the webhook
+</ResponseField>
+
+<ResponseField name="url" type="string">
+  Webhook URL
+</ResponseField>
+
+<ResponseField name="events" type="array">
+  Subscribed event types
+</ResponseField>
+
+<ResponseField name="secret" type="string">
+  Webhook secret (only shown once)
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Webhook status (`active`, `inactive`)
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="last_delivery" type="string">
+  Last successful delivery timestamp (ISO 8601)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.railsfromthecrypt.com/v1/webhooks" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/webhooks/hr",
+    "events": ["transaction.completed", "transaction.failed"],
+    "secret": "your-webhook-secret",
+    "description": "Transaction notifications"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/webhooks', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url: 'https://your-app.com/webhooks/hr',
+    events: ['transaction.completed', 'transaction.failed'],
+    secret: 'your-webhook-secret',
+    description: 'Transaction notifications'
+  })
+});
+
+const webhook = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "id": "wh_123e4567-e89b-12d3-a456-426614174000",
+  "url": "https://your-app.com/webhooks/hr",
+  "events": ["transaction.completed", "transaction.failed"],
+  "secret": "whsec_1234567890abcdef1234567890abcdef",
+  "status": "active",
+  "created_at": "2024-01-01T12:00:00Z",
+  "last_delivery": null
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="List Webhooks"
+    icon="list"
+    href="/api/webhooks/list"
+  >
+    Get list of all webhooks
+  </Card>
+  <Card
+    title="Get Webhook"
+    icon="search"
+    href="/api/webhooks/get"
+  >
+    Get specific webhook details
+  </Card>
+</CardGroup>

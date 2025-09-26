@@ -1,0 +1,750 @@
+---
+title: "Authentication"
+description: "Learn how to authenticate and secure your API calls with HR API"
+---
+
+## Overview
+
+HR API uses JWT (JSON Web Tokens) for authentication. This guide covers all aspects of authentication including login, token management, 2FA, and security best practices.
+
+## Authentication Flow
+
+<Steps>
+  <Step title="Login">
+    Send credentials to the login endpoint to get access and refresh tokens
+  </Step>
+  <Step title="Use Access Token">
+    Include the access token in the Authorization header for API requests
+  </Step>
+  <Step title="Refresh Token">
+    Use the refresh token to get new access tokens when they expire
+  </Step>
+  <Step title="Logout">
+    Invalidate tokens when the user logs out
+  </Step>
+</Steps>
+
+## Login
+
+Authenticate with your email and password to get access tokens.
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "your-email@example.com",
+    "password": "your-password"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'your-email@example.com',
+    password: 'your-password'
+  })
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/auth/login',
+    json={
+        'email': 'your-email@example.com',
+        'password': 'your-password'
+    }
+)
+
+data = response.json()
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Success Response
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 7200,
+  "is_2fa_enabled": false
+}
+```
+
+```json 2FA Required Response
+{
+  "message": "Two-factor authentication required",
+  "status": 402
+}
+```
+
+</ResponseExample>
+
+<Warning>
+If 2FA is enabled for your account, you'll receive a 402 status code. You'll need to verify your 2FA code before getting access tokens.
+</Warning>
+
+## Using Access Tokens
+
+Include your access token in the Authorization header for all authenticated requests:
+
+```bash
+Authorization: Bearer <your_access_token>
+```
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET https://api.railsfromthecrypt.com/v1/users/me \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/users/me', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.railsfromthecrypt.com/v1/users/me',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+```
+
+</CodeGroup>
+
+## Token Expiration
+
+Access tokens expire after **2 hours**. When a token expires, you'll receive a 401 Unauthorized response:
+
+```json
+{
+  "success": false,
+  "message": "Token expired",
+  "error": {
+    "code": "TOKEN_EXPIRED"
+  }
+}
+```
+
+## Refresh Tokens
+
+Use refresh tokens to get new access tokens without requiring user re-authentication:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "your-refresh-token"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/refresh', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    refresh_token: 'your-refresh-token'
+  })
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/auth/refresh',
+    json={
+        'refresh_token': 'your-refresh-token'
+    }
+)
+
+data = response.json()
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Success Response
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 7200,
+  "is_2fa_enabled": false
+}
+```
+
+```json Error Response
+{
+  "success": false,
+  "message": "Invalid or expired refresh token"
+}
+```
+
+</ResponseExample>
+
+<Info>
+Refresh tokens are long-lived and can be used multiple times. Store them securely and use them to maintain user sessions.
+</Info>
+
+## Logout
+
+Invalidate tokens when users log out:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/auth/logout \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "your-refresh-token"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/logout', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    refresh_token: 'your-refresh-token'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/auth/logout',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'refresh_token': 'your-refresh-token'
+    }
+)
+```
+
+</CodeGroup>
+
+## Two-Factor Authentication (2FA)
+
+### Enable 2FA
+
+First, get a QR code for setting up 2FA:
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET https://api.railsfromthecrypt.com/v1/2fa/qrcode \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/2fa/qrcode', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.railsfromthecrypt.com/v1/2fa/qrcode',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+
+data = response.json()
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Response
+{
+  "data": {
+    "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+  },
+  "message": "QR code generated"
+}
+```
+
+</ResponseExample>
+
+### Verify 2FA Setup
+
+After scanning the QR code with your authenticator app, verify the setup:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/2fa/enable \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "123456"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/2fa/enable', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    code: '123456'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/2fa/enable',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'code': '123456'
+    }
+)
+```
+
+</CodeGroup>
+
+### Login with 2FA
+
+When 2FA is enabled, you'll need to provide a 2FA code after initial login:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/auth/verify \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "123456"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/verify', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    code: '123456'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/auth/verify',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'code': '123456'
+    }
+)
+```
+
+</CodeGroup>
+
+## Password Management
+
+### Set Password
+
+Set a password for your account:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/auth/set-password \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "password": "StrongP@ssw0rd!",
+    "confirm_password": "StrongP@ssw0rd!"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/set-password', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    password: 'StrongP@ssw0rd!',
+    confirm_password: 'StrongP@ssw0rd!'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/auth/set-password',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'password': 'StrongP@ssw0rd!',
+        'confirm_password': 'StrongP@ssw0rd!'
+    }
+)
+```
+
+</CodeGroup>
+
+### Forgot Password
+
+Request a password reset:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/auth/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "your-email@example.com"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/forgot-password', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'your-email@example.com'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/auth/forgot-password',
+    json={
+        'email': 'your-email@example.com'
+    }
+)
+```
+
+</CodeGroup>
+
+### Reset Password
+
+Reset your password using the verification code:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/auth/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "your-email@example.com",
+    "code": "123456",
+    "newPassword": "NewStrongP@ssw0rd!",
+    "confirm_password": "NewStrongP@ssw0rd!"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/reset-password', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'your-email@example.com',
+    code: '123456',
+    newPassword: 'NewStrongP@ssw0rd!',
+    confirm_password: 'NewStrongP@ssw0rd!'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/auth/reset-password',
+    json={
+        'email': 'your-email@example.com',
+        'code': '123456',
+        'newPassword': 'NewStrongP@ssw0rd!',
+        'confirm_password': 'NewStrongP@ssw0rd!'
+    }
+)
+```
+
+</CodeGroup>
+
+## Email Verification
+
+Verify your email address:
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET https://api.railsfromthecrypt.com/v1/auth/verify-email \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/verify-email', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.railsfromthecrypt.com/v1/auth/verify-email',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+```
+
+</CodeGroup>
+
+## Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="Token Storage">
+    - Store tokens securely using environment variables or secure credential management systems
+    - Never commit tokens to version control
+    - Use HTTPS for all API requests
+    - Implement token rotation for long-running applications
+  </Accordion>
+  <Accordion title="Password Security">
+    - Use strong, unique passwords
+    - Enable 2FA for additional security
+    - Implement password complexity requirements
+    - Use password managers for development accounts
+  </Accordion>
+  <Accordion title="Error Handling">
+    - Handle token expiration gracefully
+    - Implement automatic token refresh
+    - Log authentication failures for monitoring
+    - Don't expose sensitive error details to end users
+  </Accordion>
+  <Accordion title="Rate Limiting">
+    - Implement client-side rate limiting
+    - Handle 429 responses appropriately
+    - Use exponential backoff for retries
+    - Monitor your API usage patterns
+  </Accordion>
+</AccordionGroup>
+
+## Common Authentication Errors
+
+<CardGroup cols={2}>
+  <Card title="401 Unauthorized" icon="exclamation-triangle">
+    - Invalid or expired access token
+    - Missing Authorization header
+    - Malformed token format
+  </Card>
+  <Card title="402 Payment Required" icon="shield-check">
+    - 2FA verification required
+    - Complete 2FA flow to proceed
+  </Card>
+  <Card title="403 Forbidden" icon="lock">
+    - Insufficient permissions
+    - Account restrictions
+    - IP whitelist violations
+  </Card>
+  <Card title="429 Too Many Requests" icon="clock">
+    - Rate limit exceeded
+    - Wait for reset time
+    - Implement backoff strategy
+  </Card>
+</CardGroup>
+
+## Token Management Example
+
+Here's a complete example of token management in JavaScript:
+
+```javascript
+class HRAPIClient {
+  constructor(baseUrl, email, password) {
+    this.baseUrl = baseUrl;
+    this.email = email;
+    this.password = password;
+    this.accessToken = null;
+    this.refreshToken = null;
+  }
+
+  async login() {
+    const response = await fetch(`${this.baseUrl}/v1/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: this.email,
+        password: this.password
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Login failed');
+    }
+
+    const data = await response.json();
+    this.accessToken = data.access_token;
+    this.refreshToken = data.refresh_token;
+    
+    return data;
+  }
+
+  async refreshAccessToken() {
+    if (!this.refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await fetch(`${this.baseUrl}/v1/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        refresh_token: this.refreshToken
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Token refresh failed');
+    }
+
+    const data = await response.json();
+    this.accessToken = data.access_token;
+    this.refreshToken = data.refresh_token;
+    
+    return data;
+  }
+
+  async makeRequest(endpoint, options = {}) {
+    if (!this.accessToken) {
+      await this.login();
+    }
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers: {
+        'Authorization': `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+    });
+
+    if (response.status === 401) {
+      // Token expired, try to refresh
+      await this.refreshAccessToken();
+      
+      // Retry the request with new token
+      return fetch(`${this.baseUrl}${endpoint}`, {
+        ...options,
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      });
+    }
+
+    return response;
+  }
+
+  async logout() {
+    if (this.refreshToken) {
+      await fetch(`${this.baseUrl}/v1/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          refresh_token: this.refreshToken
+        })
+      });
+    }
+
+    this.accessToken = null;
+    this.refreshToken = null;
+  }
+}
+
+// Usage
+const client = new HRAPIClient(
+  'https://api.railsfromthecrypt.com',
+  'your-email@example.com',
+  'your-password'
+);
+
+// Make authenticated requests
+const response = await client.makeRequest('/v1/users/me');
+const userData = await response.json();
+```
+
+<Note>
+This example includes automatic token refresh and error handling. Adapt it to your specific needs and programming language.
+</Note>

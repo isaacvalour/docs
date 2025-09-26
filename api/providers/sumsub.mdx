@@ -1,0 +1,128 @@
+---
+title: "Sumsub Webhook"
+api: "POST /v1/providers/sumsub"
+description: "Handle webhook events from Sumsub KYC provider"
+---
+
+## Overview
+
+Receive and process webhook events from Sumsub KYC provider. This endpoint handles KYC verification updates, document processing, and other events from Sumsub.
+
+<Note>
+This endpoint is designed to receive webhooks from Sumsub and does not require authentication. It's used internally by the system to process KYC verification events.
+</Note>
+
+## Request Headers
+
+<ParamField header="X-Sumsub-Signature" type="string" required>
+  Webhook signature for verification
+</ParamField>
+
+<ParamField header="Content-Type" type="string" required>
+  Must be `application/json`
+</ParamField>
+
+## Request Body
+
+<ParamField body="event_type" type="string" required>
+  Type of event from Sumsub
+</ParamField>
+
+<ParamField body="data" type="object" required>
+  Event data payload
+</ParamField>
+
+<ParamField body="timestamp" type="string" required>
+  Event timestamp from Sumsub
+</ParamField>
+
+<ParamField body="signature" type="string" required>
+  Event signature for verification
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the webhook was processed successfully
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Processing result message
+</ResponseField>
+
+<ResponseField name="processed_at" type="string">
+  Processing timestamp (ISO 8601)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.railsfromthecrypt.com/v1/providers/sumsub" \
+  -H "X-Sumsub-Signature: sha256=abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event_type": "verification.completed",
+    "data": {
+      "applicant_id": "sumsub_app_123",
+      "verification_status": "approved",
+      "verification_level": "enhanced"
+    },
+    "timestamp": "2024-01-01T12:00:00Z",
+    "signature": "sha256=def456..."
+  }'
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "success": true,
+  "message": "Webhook processed successfully",
+  "processed_at": "2024-01-01T12:00:01Z"
+}
+```
+
+</ResponseExample>
+
+## Event Types
+
+<CardGroup cols={2}>
+  <Card title="Verification Events" icon="user-check">
+    - `verification.completed`
+    - `verification.failed`
+    - `verification.pending`
+    - `verification.rejected`
+  </Card>
+  <Card title="Document Events" icon="file-text">
+    - `document.uploaded`
+    - `document.verified`
+    - `document.rejected`
+    - `document.expired`
+  </Card>
+</CardGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Alatpay Webhook"
+    icon="alat"
+    href="/api/providers/alatpay"
+  >
+    Handle Alatpay provider webhooks
+  </Card>
+  <Card
+    title="Nomba Webhook"
+    icon="nomba"
+    href="/api/providers/nomba"
+  >
+    Handle Nomba provider webhooks
+  </Card>
+</CardGroup>
+

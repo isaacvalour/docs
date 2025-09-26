@@ -1,0 +1,558 @@
+---
+title: "Create Virtual Account Request"
+api: "POST /v1/virtual-accounts/requests"
+description: "Submit a request to create a new virtual account for receiving payments"
+---
+
+## Overview
+
+Create a virtual account request that will be reviewed and processed by administrators. Once approved, a virtual account will be created and you'll receive the account details for receiving payments.
+
+<Note>
+Virtual account requests require approval from administrators. You'll receive notifications about the approval status through webhooks or by checking the request status.
+</Note>
+
+## Request
+
+<ParamField body="currency" type="string" required>
+  Currency for the virtual account. Must be one of: `USD`, `NGN`
+</ParamField>
+
+<ParamField body="need_new_wallet" type="boolean" required>
+  Whether a new wallet needs to be created for settlement
+</ParamField>
+
+<ParamField body="settlement_id" type="string">
+  Settlement ID for the virtual account (optional)
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Virtual account request details
+</ResponseField>
+
+<ResponseField name="data.id" type="string">
+  Unique identifier for the virtual account request
+</ResponseField>
+
+<ResponseField name="data.reference" type="string">
+  Unique reference for the virtual account request
+</ResponseField>
+
+<ResponseField name="data.client_id" type="string">
+  Client ID for the request
+</ResponseField>
+
+<ResponseField name="data.settlement_id" type="string">
+  Settlement ID for the request
+</ResponseField>
+
+<ResponseField name="data.currency" type="string">
+  Currency for the virtual account request
+</ResponseField>
+
+<ResponseField name="data.need_new_wallet" type="boolean">
+  Whether a new wallet needs to be created
+</ResponseField>
+
+<ResponseField name="data.type" type="string">
+  Type of virtual account request (`permanent` or `temporary`)
+</ResponseField>
+
+<ResponseField name="data.status" type="string">
+  Status of the request (`pending`, `approved`, `rejected`, `needs_action`)
+</ResponseField>
+
+<ResponseField name="data.verification_link" type="string">
+  Verification link for KYC completion (USD only)
+</ResponseField>
+
+<ResponseField name="data.completed_at" type="string">
+  When the request was completed (ISO 8601 format)
+</ResponseField>
+
+<ResponseField name="data.expires_at" type="string">
+  When the request expires (ISO 8601 format)
+</ResponseField>
+
+<ResponseField name="data.failure_reason" type="string">
+  Reason for failure if request failed
+</ResponseField>
+
+<ResponseField name="data.created_at" type="string">
+  When the request was created (ISO 8601 format)
+</ResponseField>
+
+<ResponseField name="data.updated_at" type="string">
+  When the request was last updated (ISO 8601 format)
+</ResponseField>
+
+<ResponseField name="data.recipient" type="object">
+  Recipient information for settlement
+</ResponseField>
+
+<ResponseField name="data.virtualAccount" type="object">
+  Virtual account details (if approved)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/virtual-accounts/requests \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "currency": "USD",
+    "need_new_wallet": false,
+    "settlement_id": "1263995f-e317-44ab-b8ea-3dc2dc5a08bb"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/virtual-accounts/requests', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    currency: 'USD',
+    need_new_wallet: false,
+    settlement_id: '1263995f-e317-44ab-b8ea-3dc2dc5a08bb'
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/virtual-accounts/requests',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'currency': 'USD',
+        'need_new_wallet': False,
+        'settlement_id': '1263995f-e317-44ab-b8ea-3dc2dc5a08bb'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+```php PHP
+<?php
+
+$response = $httpClient->post('https://api.railsfromthecrypt.com/v1/virtual-accounts/requests', [
+    'headers' => [
+        'Authorization' => 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type' => 'application/json'
+    ],
+    'json' => [
+        'currency' => 'USD',
+        'need_new_wallet' => false,
+        'settlement_id' => '1263995f-e317-44ab-b8ea-3dc2dc5a08bb'
+    ]
+]);
+
+$data = $response->json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "message": "Virtual account request created successfully",
+  "data": {
+    "id": "e21ab66d-9d93-48d7-88b2-1981c074d0c0",
+    "reference": "var-tg6jfou0c6hq760z",
+    "client_id": "7d878b64-d4e7-4237-9b4d-a53a24b9cf5e",
+    "settlement_id": "1263995f-e317-44ab-b8ea-3dc2dc5a08bb",
+    "currency": "USD",
+    "need_new_wallet": false,
+    "type": "permanent",
+    "status": "needs_action",
+    "verification_link": "https://bridge.withpersona.com/verify?fields%5Bdeveloper_id%5D=cf6bdaea-eaa0-4fff-9132-9559fe93aa65&fields%5Bemail_address%5D=telegrams%40gmail.com&environment-id=env_UWeuo2CnqFQXVeKujbQLBx6u&inquiry-template-id=itmpl_wKuJEFST4JKViF2zcfmNJJJs&reference-id=6485637a-6758-413b-b04a-ee11e3ed4bfd",
+    "completed_at": null,
+    "expires_at": "2025-08-28T15:51:35.000Z",
+    "failure_reason": null,
+    "created_at": "2025-08-21T16:51:35.000Z",
+    "updated_at": "2025-08-21T16:51:35.000Z",
+    "deleted_at": null,
+    "recipient": {
+      "id": "1263995f-e317-44ab-b8ea-3dc2dc5a08bb",
+      "network": "Polygon",
+      "currency": "USDC",
+      "wallet_address": "0x3fA91D6b84bE2c0BFD7647a92E5B1A2Ec6F8C91e"
+    },
+    "virtualAccount": null
+  }
+}
+```
+
+```json Approved Request Response
+{
+  "message": "Virtual account request created successfully",
+  "data": {
+    "id": "d814fd9b-3dbd-4761-b368-446b78b3e89e",
+    "reference": "var-k5ma71ykwcivojhn",
+    "client_id": "7d878b64-d4e7-4237-9b4d-a53a24b9cf5e",
+    "settlement_id": "1263995f-e317-44ab-b8ea-3dc2dc5a08bb",
+    "currency": "USD",
+    "need_new_wallet": false,
+    "type": "permanent",
+    "status": "approved",
+    "verification_link": null,
+    "completed_at": "2025-08-21T16:35:40.000Z",
+    "expires_at": "2025-08-28T15:35:39.000Z",
+    "failure_reason": null,
+    "created_at": "2025-08-21T16:35:40.000Z",
+    "updated_at": "2025-08-21T16:35:40.000Z",
+    "deleted_at": null,
+    "recipient": {
+      "id": "1263995f-e317-44ab-b8ea-3dc2dc5a08bb",
+      "network": "Polygon",
+      "currency": "USDC",
+      "wallet_address": "0x3fA91D6b84bE2c0BFD7647a92E5B1A2Ec6F8C91e"
+    },
+    "virtualAccount": {
+      "id": "d51fcca8-be75-4e7f-8747-48173969fd93",
+      "bank_name": "Lead Bank",
+      "bank_code": "058",
+      "bank_address": "1801 Main St., Kansas City, MO 64108",
+      "routing_number": "87654321",
+      "beneficiary_name": "Andrew Baker",
+      "beneficiary_address": "1234 Main St., Kansas City, MO 64108",
+      "account_number": "812450046",
+      "account_name": "Andrew Baker",
+      "reference": "VA-8CXJFZK06H13E02X"
+    }
+  }
+}
+```
+
+</ResponseExample>
+
+## Error Responses
+
+<ResponseField name="message" type="string">
+  Error description
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  Error details
+</ResponseField>
+
+### Common Error Codes
+
+<CardGroup cols={2}>
+  <Card title="400 Bad Request" icon="exclamation-triangle">
+    - **INVALID_CURRENCY**: Currency not supported
+    - **MISSING_SETTLEMENT**: Settlement ID required for USD accounts
+    - **INVALID_SETTLEMENT**: Settlement ID not found
+  </Card>
+  <Card title="401 Unauthorized" icon="shield-exclamation">
+    - **INVALID_TOKEN**: Invalid or expired access token
+    - **MISSING_TOKEN**: Authorization header missing
+  </Card>
+  <Card title="403 Forbidden" icon="lock">
+    - **INSUFFICIENT_PERMISSIONS**: Account doesn't have permission to create virtual accounts
+    - **ACCOUNT_RESTRICTED**: Account is restricted
+  </Card>
+  <Card title="409 Conflict" icon="exclamation">
+    - **DUPLICATE_REQUEST**: Similar request already exists
+    - **ACCOUNT_EXISTS**: Virtual account already exists for this currency
+  </Card>
+</CardGroup>
+
+## Usage Examples
+
+### Create USD Virtual Account
+
+<CodeGroup>
+
+```javascript JavaScript
+async function createUSDVirtualAccount(settlementId) {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/virtual-accounts/requests', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        currency: 'USD',
+        need_new_wallet: false,
+        settlement_id: settlementId
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create virtual account request');
+    }
+
+    const data = await response.json();
+    
+    // Check if KYC verification is required
+    if (data.data.verification_link) {
+      console.log('KYC verification required:', data.data.verification_link);
+      // Redirect user to complete KYC
+      window.open(data.data.verification_link, '_blank');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error creating virtual account:', error);
+    throw error;
+  }
+}
+```
+
+```python Python
+def create_usd_virtual_account(settlement_id):
+    try:
+        response = requests.post(
+            'https://api.railsfromthecrypt.com/v1/virtual-accounts/requests',
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                'currency': 'USD',
+                'need_new_wallet': False,
+                'settlement_id': settlement_id
+            }
+        )
+        
+        if not response.ok:
+            raise Exception('Failed to create virtual account request')
+        
+        data = response.json()
+        
+        # Check if KYC verification is required
+        if data['data']['verification_link']:
+            print(f'KYC verification required: {data["data"]["verification_link"]}')
+            # Redirect user to complete KYC
+        
+        return data
+        
+    except Exception as e:
+        print(f'Error creating virtual account: {e}')
+        raise
+```
+
+</CodeGroup>
+
+### Create NGN Virtual Account
+
+<CodeGroup>
+
+```javascript JavaScript
+async function createNGNVirtualAccount() {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/virtual-accounts/requests', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        currency: 'NGN',
+        need_new_wallet: true
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create virtual account request');
+    }
+
+    const data = await response.json();
+    console.log('Virtual account request created:', data.data.reference);
+    
+    return data;
+  } catch (error) {
+    console.error('Error creating virtual account:', error);
+    throw error;
+  }
+}
+```
+
+</CodeGroup>
+
+### Monitor Request Status
+
+<CodeGroup>
+
+```javascript JavaScript
+async function monitorVirtualAccountRequest(requestId) {
+  const maxAttempts = 30; // 5 minutes with 10-second intervals
+  let attempts = 0;
+  
+  while (attempts < maxAttempts) {
+    try {
+      const response = await fetch(`https://api.railsfromthecrypt.com/v1/virtual-accounts/requests/${requestId}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch request status');
+      }
+      
+      const data = await response.json();
+      const status = data.data.status;
+      
+      if (status === 'approved') {
+        console.log('Virtual account approved:', data.data.virtualAccount);
+        return data.data;
+      } else if (status === 'rejected') {
+        throw new Error(`Request rejected: ${data.data.failure_reason}`);
+      }
+      
+      // Still pending, wait and retry
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      attempts++;
+      
+    } catch (error) {
+      console.error('Error monitoring request:', error);
+      throw error;
+    }
+  }
+  
+  throw new Error('Request monitoring timeout');
+}
+```
+
+</CodeGroup>
+
+## Virtual Account Types
+
+<AccordionGroup>
+  <Accordion title="USD Virtual Accounts">
+    - **Provider**: Bridge
+    - **KYC Required**: Yes (through Persona)
+    - **Settlement**: Crypto wallet (USDC on Polygon)
+    - **Features**: ACH transfers, wire transfers, real-time notifications
+    - **Approval Time**: 1-3 business days
+  </Accordion>
+  <Accordion title="NGN Virtual Accounts">
+    - **Providers**: Nomba, Juicyway, Alatpay
+    - **KYC Required**: No (for basic accounts)
+    - **Settlement**: Crypto wallet (USDC on Polygon)
+    - **Features**: Local bank transfers, instant settlement
+    - **Approval Time**: 24-48 hours
+  </Accordion>
+</AccordionGroup>
+
+## Status Flow
+
+<Steps>
+  <Step title="Request Created">
+    Virtual account request is submitted and receives `pending` status
+  </Step>
+  <Step title="KYC Verification">
+    For USD accounts, user completes KYC verification (status: `needs_action`)
+  </Step>
+  <Step title="Admin Review">
+    Administrators review the request and supporting documentation
+  </Step>
+  <Step title="Approval/Rejection">
+    Request is approved (`approved`) or rejected (`rejected`)
+  </Step>
+  <Step title="Account Creation">
+    If approved, virtual account is created and details are provided
+  </Step>
+</Steps>
+
+## Webhook Events
+
+Virtual account requests trigger the following webhook events:
+
+<CardGroup cols={2}>
+  <Card title="virtual_account.request_created" icon="plus">
+    New virtual account request created
+  </Card>
+  <Card title="virtual_account.request_approved" icon="check">
+    Virtual account request approved
+  </Card>
+  <Card title="virtual_account.request_rejected" icon="times">
+    Virtual account request rejected
+  </Card>
+  <Card title="virtual_account.created" icon="credit-card">
+    Virtual account successfully created
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Request Management">
+    - Monitor request status regularly
+    - Complete KYC verification promptly for USD accounts
+    - Provide accurate settlement information
+    - Keep track of request references
+  </Accordion>
+  <Accordion title="Error Handling">
+    - Handle approval/rejection scenarios
+    - Implement retry logic for failed requests
+    - Provide user feedback on request status
+    - Handle KYC verification failures
+  </Accordion>
+  <Accordion title="Security">
+    - Validate settlement IDs before submission
+    - Secure storage of virtual account details
+    - Monitor for unauthorized access
+    - Implement proper access controls
+  </Accordion>
+</AccordionGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Requests"
+    icon="list"
+    href="/api/virtual-accounts/requests"
+  >
+    Retrieve all virtual account requests
+  </Card>
+  <Card
+    title="Get Virtual Account"
+    icon="credit-card"
+    href="/api/virtual-accounts/get"
+  >
+    Get virtual account details by ID
+  </Card>
+  <Card
+    title="Get Activities"
+    icon="history"
+    href="/api/virtual-accounts/activities"
+  >
+    Get virtual account transaction history
+  </Card>
+  <Card
+    title="Get Metrics"
+    icon="chart-line"
+    href="/api/virtual-accounts/metrics"
+  >
+    Get virtual account performance metrics
+  </Card>
+</CardGroup>

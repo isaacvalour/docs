@@ -1,0 +1,690 @@
+---
+title: "Retry Transaction"
+api: "POST /v1/transactions/{id}/retry"
+description: "Retry a failed transaction"
+---
+
+## Overview
+
+Retry a failed transaction by creating a new transaction with the same parameters. This endpoint is useful when a transaction fails due to temporary issues like network problems or rate limit errors.
+
+<Note>
+Retrying a transaction creates a new transaction with a new ID and reference. The original transaction remains in failed status for audit purposes.
+</Note>
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique internal ID of the failed transaction to retry
+  
+  **Format:** UUID (e.g., `123e4567-e89b-12d3-a456-426614174000`)
+</ParamField>
+
+## Request Body
+
+<ParamField body="amount" type="string">
+  Override the amount for the retry (optional)
+  
+  **Format:** Decimal string (e.g., `"1000.00"`)
+  **Note:** If not provided, original amount will be used
+</ParamField>
+
+<ParamField body="rate" type="string">
+  Override the exchange rate for the retry (optional)
+  
+  **Format:** Decimal string (e.g., `"1.2345"`)
+  **Note:** If not provided, current market rate will be used
+</ParamField>
+
+<ParamField body="fee" type="string">
+  Override the fee for the retry (optional)
+  
+  **Format:** Decimal string (e.g., `"10.00"`)
+  **Note:** If not provided, fee will be recalculated
+</ParamField>
+
+<ParamField body="reference" type="string">
+  Custom reference for the retry transaction (optional)
+  
+  **Format:** Alphanumeric string (e.g., `"TXN-1234567890"`)
+  **Note:** If not provided, will be generated automatically
+</ParamField>
+
+<ParamField body="description" type="string">
+  Description for the retry transaction (optional)
+  
+  **Format:** String up to 255 characters
+  **Note:** If not provided, will include retry information
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Additional metadata for the retry transaction
+  
+  **Format:** JSON object with custom fields
+  **Note:** Will be merged with original transaction metadata
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique internal identifier for the new retry transaction
+</ResponseField>
+
+<ResponseField name="reference" type="string">
+  Unique reference ID for the retry transaction
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Status of the retry transaction (`pending`)
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Transaction type (`transfer`)
+</ResponseField>
+
+<ResponseField name="amount" type="string">
+  Transaction amount
+</ResponseField>
+
+<ResponseField name="fee" type="string">
+  Transaction fee
+</ResponseField>
+
+<ResponseField name="sender_currency" type="string">
+  Source currency code
+</ResponseField>
+
+<ResponseField name="receiver_currency" type="string">
+  Destination currency code
+</ResponseField>
+
+<ResponseField name="rate" type="string">
+  Exchange rate used for the transaction
+</ResponseField>
+
+<ResponseField name="source_amount" type="string">
+  Amount to be sent from source
+</ResponseField>
+
+<ResponseField name="received_amount" type="string">
+  Amount to be received by destination
+</ResponseField>
+
+<ResponseField name="transfer_fee" type="string">
+  Transfer fee amount
+</ResponseField>
+
+<ResponseField name="recipient_name" type="string">
+  Name of the recipient
+</ResponseField>
+
+<ResponseField name="wallet_address" type="string">
+  Destination wallet address
+</ResponseField>
+
+<ResponseField name="network" type="string">
+  Blockchain network to be used
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Retry transaction creation timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="retry_of" type="string">
+  ID of the original transaction that was retried
+</ResponseField>
+
+<ResponseField name="retry_count" type="number">
+  Number of times this transaction has been retried
+</ResponseField>
+
+<ResponseField name="payment_instructions" type="object">
+  Instructions for completing the payment
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.railsfromthecrypt.com/v1/transactions/123e4567-e89b-12d3-a456-426614174000/retry" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reference": "TXN-RETRY-1234567890",
+    "description": "Retry of failed transaction",
+    "metadata": {
+      "retry_reason": "Network timeout",
+      "retry_source": "user_request"
+    }
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions/123e4567-e89b-12d3-a456-426614174000/retry', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    reference: 'TXN-RETRY-1234567890',
+    description: 'Retry of failed transaction',
+    metadata: {
+      retry_reason: 'Network timeout',
+      retry_source: 'user_request'
+    }
+  })
+});
+
+const retryTransaction = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/transactions/123e4567-e89b-12d3-a456-426614174000/retry',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'reference': 'TXN-RETRY-1234567890',
+        'description': 'Retry of failed transaction',
+        'metadata': {
+            'retry_reason': 'Network timeout',
+            'retry_source': 'user_request'
+        }
+    }
+)
+retry_transaction = response.json()
+```
+
+```php PHP
+<?php
+
+$response = $httpClient->post('https://api.railsfromthecrypt.com/v1/transactions/123e4567-e89b-12d3-a456-426614174000/retry', [
+    'headers' => [
+        'Authorization' => 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type' => 'application/json'
+    ],
+    'json' => [
+        'reference' => 'TXN-RETRY-1234567890',
+        'description' => 'Retry of failed transaction',
+        'metadata' => [
+            'retry_reason' => 'Network timeout',
+            'retry_source' => 'user_request'
+        ]
+    ]
+]);
+$retryTransaction = $response->json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "id": "123e4567-e89b-12d3-a456-426614174001",
+  "reference": "TXN-RETRY-1234567890",
+  "status": "pending",
+  "type": "transfer",
+  "amount": "1000.00",
+  "fee": "10.00",
+  "sender_currency": "NGN",
+  "receiver_currency": "USDC",
+  "rate": "1.2345",
+  "source_amount": "1000.00",
+  "received_amount": "990.00",
+  "transfer_fee": "10.00",
+  "recipient_name": "John Doe",
+  "wallet_address": "0x1234567890abcdef1234567890abcdef12345678",
+  "network": "Polygon",
+  "created_at": "2024-01-01T12:30:00Z",
+  "retry_of": "123e4567-e89b-12d3-a456-426614174000",
+  "retry_count": 1,
+  "payment_instructions": {
+    "amount": "1000.00",
+    "currency": "NGN",
+    "reference": "TXN-RETRY-1234567890",
+    "account_details": {
+      "bank_name": "First Bank of Nigeria",
+      "account_number": "1234567890",
+      "account_name": "HashRails Limited",
+      "routing_code": "011"
+    }
+  }
+}
+```
+
+</ResponseExample>
+
+## Error Responses
+
+<ResponseField name="message" type="string">
+  Error description
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  Error details
+</ResponseField>
+
+### Common Error Codes
+
+<CardGroup cols={2}>
+  <Card title="404 Not Found" icon="search">
+    - **TRANSACTION_NOT_FOUND**: Transaction with the specified ID not found
+    - **INVALID_ID**: Invalid transaction ID format
+  </Card>
+  <Card title="400 Bad Request" icon="exclamation-triangle">
+    - **CANNOT_RETRY**: Transaction cannot be retried in current status
+    - **ALREADY_RETRIED**: Transaction has already been retried
+    - **INVALID_STATUS**: Transaction is not in a retryable state
+    - **INVALID_AMOUNT**: Invalid amount for retry
+  </Card>
+  <Card title="401 Unauthorized" icon="shield-exclamation">
+    - **INVALID_TOKEN**: Invalid or expired access token
+    - **MISSING_TOKEN**: Authorization header missing
+  </Card>
+  <Card title="403 Forbidden" icon="lock">
+    - **ACCESS_DENIED**: User doesn't have access to this transaction
+    - **RETRY_NOT_ALLOWED**: User not allowed to retry this transaction
+  </Card>
+</CardGroup>
+
+## Usage Examples
+
+### Basic Transaction Retry
+
+<CodeGroup>
+
+```javascript JavaScript
+async function retryTransaction(transactionId, retryData = {}) {
+  try {
+    const response = await fetch(`https://api.railsfromthecrypt.com/v1/transactions/${transactionId}/retry`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(retryData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to retry transaction');
+    }
+
+    const retryTransaction = await response.json();
+    console.log('Transaction retry created:', retryTransaction);
+    
+    return retryTransaction;
+  } catch (error) {
+    console.error('Error retrying transaction:', error);
+    throw error;
+  }
+}
+
+// Usage
+const retryData = {
+  reference: `TXN-RETRY-${Date.now()}`,
+  description: 'Retry of failed transaction',
+  metadata: {
+    retry_reason: 'Network timeout',
+    retry_source: 'user_request'
+  }
+};
+
+await retryTransaction('123e4567-e89b-12d3-a456-426614174000', retryData);
+```
+
+```python Python
+def retry_transaction(transaction_id, retry_data=None):
+    try:
+        if retry_data is None:
+            retry_data = {}
+            
+        response = requests.post(
+            f'https://api.railsfromthecrypt.com/v1/transactions/{transaction_id}/retry',
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Content-Type': 'application/json'
+            },
+            json=retry_data
+        )
+        
+        if not response.ok:
+            error = response.json()
+            raise Exception(error.get('message', 'Failed to retry transaction'))
+        
+        retry_transaction = response.json()
+        print('Transaction retry created:', retry_transaction)
+        
+        return retry_transaction
+        
+    except Exception as e:
+        print(f'Error retrying transaction: {e}')
+        raise
+
+# Usage
+retry_data = {
+    'reference': f'TXN-RETRY-{int(time.time())}',
+    'description': 'Retry of failed transaction',
+    'metadata': {
+        'retry_reason': 'Network timeout',
+        'retry_source': 'user_request'
+    }
+}
+
+retry_transaction('123e4567-e89b-12d3-a456-426614174000', retry_data)
+```
+
+</CodeGroup>
+
+### Check if Transaction Can Be Retried
+
+<CodeGroup>
+
+```javascript JavaScript
+async function canRetryTransaction(transactionId) {
+  try {
+    // First, get the transaction to check its status
+    const response = await fetch(`https://api.railsfromthecrypt.com/v1/transactions/${transactionId}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch transaction');
+    }
+
+    const transaction = await response.json();
+    
+    // Check if transaction can be retried
+    const retryableStatuses = ['failed'];
+    const canRetry = retryableStatuses.includes(transaction.status);
+    
+    return {
+      canRetry,
+      status: transaction.status,
+      reason: canRetry ? null : `Transaction is in ${transaction.status} status and cannot be retried`
+    };
+  } catch (error) {
+    console.error('Error checking if transaction can be retried:', error);
+    throw error;
+  }
+}
+
+// Usage
+const retryCheck = await canRetryTransaction('123e4567-e89b-12d3-a456-426614174000');
+if (retryCheck.canRetry) {
+  await retryTransaction('123e4567-e89b-12d3-a456-426614174000');
+} else {
+  console.log('Cannot retry transaction:', retryCheck.reason);
+}
+```
+
+</CodeGroup>
+
+### Retry with Updated Parameters
+
+<CodeGroup>
+
+```javascript JavaScript
+async function retryTransactionWithUpdates(transactionId, updates) {
+  try {
+    const response = await fetch(`https://api.railsfromthecrypt.com/v1/transactions/${transactionId}/retry`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updates)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to retry transaction');
+    }
+
+    const retryTransaction = await response.json();
+    console.log('Transaction retry created with updates:', retryTransaction);
+    
+    return retryTransaction;
+  } catch (error) {
+    console.error('Error retrying transaction with updates:', error);
+    throw error;
+  }
+}
+
+// Usage
+const updates = {
+  amount: '1200.00', // Updated amount
+  rate: '1.2500',    // Updated rate
+  fee: '12.00',      // Updated fee
+  reference: `TXN-RETRY-${Date.now()}`,
+  description: 'Retry with updated parameters',
+  metadata: {
+    retry_reason: 'Updated parameters',
+    retry_source: 'user_request',
+    original_amount: '1000.00'
+  }
+};
+
+await retryTransactionWithUpdates('123e4567-e89b-12d3-a456-426614174000', updates);
+```
+
+</CodeGroup>
+
+### Automatic Retry with Exponential Backoff
+
+<CodeGroup>
+
+```javascript JavaScript
+class TransactionRetryManager {
+  constructor(apiClient) {
+    this.apiClient = apiClient;
+    this.maxRetries = 3;
+    this.baseDelay = 1000; // 1 second
+  }
+  
+  async retryTransactionWithBackoff(transactionId, retryData = {}) {
+    let lastError;
+    
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      try {
+        console.log(`Retry attempt ${attempt} for transaction ${transactionId}`);
+        
+        const retryTransaction = await this.retryTransaction(transactionId, {
+          ...retryData,
+          metadata: {
+            ...retryData.metadata,
+            retry_attempt: attempt,
+            retry_source: 'automatic'
+          }
+        });
+        
+        console.log(`Transaction retry successful on attempt ${attempt}`);
+        return retryTransaction;
+        
+      } catch (error) {
+        lastError = error;
+        console.error(`Retry attempt ${attempt} failed:`, error.message);
+        
+        // If this is the last attempt, throw the error
+        if (attempt === this.maxRetries) {
+          throw error;
+        }
+        
+        // Calculate delay with exponential backoff
+        const delay = this.baseDelay * Math.pow(2, attempt - 1);
+        console.log(`Waiting ${delay}ms before next retry attempt`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    throw lastError;
+  }
+  
+  async retryTransaction(transactionId, retryData) {
+    const response = await fetch(`https://api.railsfromthecrypt.com/v1/transactions/${transactionId}/retry`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(retryData)
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to retry transaction');
+    }
+    
+    return await response.json();
+  }
+}
+
+// Usage
+const retryManager = new TransactionRetryManager();
+await retryManager.retryTransactionWithBackoff('123e4567-e89b-12d3-a456-426614174000', {
+  reference: `TXN-RETRY-${Date.now()}`,
+  description: 'Automatic retry with backoff'
+});
+```
+
+</CodeGroup>
+
+### Batch Transaction Retry
+
+<CodeGroup>
+
+```javascript JavaScript
+async function retryMultipleTransactions(transactionIds, retryData = {}) {
+  try {
+    const promises = transactionIds.map(id => 
+      retryTransaction(id, retryData).catch(error => ({
+        id,
+        error: error.message,
+        success: false
+      }))
+    );
+    
+    const results = await Promise.allSettled(promises);
+    
+    const successful = [];
+    const failed = [];
+    
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        if (result.value.success === false) {
+          failed.push(result.value);
+        } else {
+          successful.push(result.value);
+        }
+      } else {
+        failed.push({
+          id: transactionIds[index],
+          error: result.reason.message,
+          success: false
+        });
+      }
+    });
+    
+    return {
+      successful,
+      failed,
+      total: transactionIds.length,
+      successCount: successful.length,
+      failureCount: failed.length
+    };
+  } catch (error) {
+    console.error('Error retrying multiple transactions:', error);
+    throw error;
+  }
+}
+
+// Usage
+const transactionIds = [
+  '123e4567-e89b-12d3-a456-426614174000',
+  '123e4567-e89b-12d3-a456-426614174001',
+  '123e4567-e89b-12d3-a456-426614174002'
+];
+
+const results = await retryMultipleTransactions(transactionIds, {
+  reference: `TXN-BATCH-RETRY-${Date.now()}`,
+  description: 'Batch retry of failed transactions'
+});
+
+console.log(`Successfully retried ${results.successCount} out of ${results.total} transactions`);
+```
+
+</CodeGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Retry Rules">
+    - Only allow retry of failed transactions
+    - Implement proper status validation before retry
+    - Limit the number of retries per transaction
+    - Use exponential backoff for automatic retries
+  </Accordion>
+  <Accordion title="User Experience">
+    - Show clear retry confirmation dialogs
+    - Provide feedback on retry results
+    - Allow users to update parameters before retry
+    - Implement proper error handling and messaging
+  </Accordion>
+  <Accordion title="Error Handling">
+    - Handle validation errors gracefully
+    - Provide clear error messages to users
+    - Implement proper logging for debugging
+    - Use appropriate HTTP status codes
+  </Accordion>
+  <Accordion title="Security">
+    - Validate user permissions before retry
+    - Log all retry attempts for audit purposes
+    - Use secure communication (HTTPS)
+    - Implement rate limiting for retry requests
+  </Accordion>
+</AccordionGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Transaction by ID"
+    icon="id-card"
+    href="/api/transactions/get-by-id"
+  >
+    Get a specific transaction by internal ID
+  </Card>
+  <Card
+    title="Create Transaction"
+    icon="plus"
+    href="/api/transactions/create"
+  >
+    Create a new transaction
+  </Card>
+  <Card
+    title="Cancel Transaction"
+    icon="times"
+    href="/api/transactions/cancel"
+  >
+    Cancel a pending transaction
+  </Card>
+  <Card
+    title="List Transactions"
+    icon="list"
+    href="/api/transactions/list"
+  >
+    Get paginated list of all transactions
+  </Card>
+</CardGroup>

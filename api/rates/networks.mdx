@@ -1,0 +1,270 @@
+---
+title: "Supported Networks"
+api: "GET /v1/rates/networks"
+description: "Get list of all supported blockchain networks"
+---
+
+## Overview
+
+Retrieve a list of all supported blockchain networks with their details, including network information, supported currencies, and transfer limits.
+
+<Note>
+This endpoint does not require authentication and provides information about available networks for cryptocurrency transfers.
+</Note>
+
+## Response
+
+<ResponseField name="networks" type="array">
+  Array of network objects
+</ResponseField>
+
+<ResponseField name="networks[].id" type="string">
+  Unique network identifier
+</ResponseField>
+
+<ResponseField name="networks[].name" type="string">
+  Network name (e.g., `"Ethereum"`, `"Bitcoin"`)
+</ResponseField>
+
+<ResponseField name="networks[].code" type="string">
+  Network code (e.g., `"ETH"`, `"BTC"`)
+</ResponseField>
+
+<ResponseField name="networks[].type" type="string">
+  Network type (`mainnet`, `testnet`)
+</ResponseField>
+
+<ResponseField name="networks[].chain_id" type="number">
+  Blockchain chain ID
+</ResponseField>
+
+<ResponseField name="networks[].native_currency" type="string">
+  Native currency code for gas fees
+</ResponseField>
+
+<ResponseField name="networks[].supported_currencies" type="array">
+  Array of supported currency codes
+</ResponseField>
+
+<ResponseField name="networks[].min_transfer" type="string">
+  Minimum transfer amount
+</ResponseField>
+
+<ResponseField name="networks[].max_transfer" type="string">
+  Maximum transfer amount
+</ResponseField>
+
+<ResponseField name="networks[].gas_fee_estimate" type="object">
+  Gas fee estimation information
+</ResponseField>
+
+<ResponseField name="networks[].gas_fee_estimate.low" type="string">
+  Low priority gas fee
+</ResponseField>
+
+<ResponseField name="networks[].gas_fee_estimate.medium" type="string">
+  Medium priority gas fee
+</ResponseField>
+
+<ResponseField name="networks[].gas_fee_estimate.high" type="string">
+  High priority gas fee
+</ResponseField>
+
+<ResponseField name="networks[].status" type="string">
+  Network status (`active`, `maintenance`, `deprecated`)
+</ResponseField>
+
+<ResponseField name="networks[].confirmation_blocks" type="number">
+  Number of confirmations required
+</ResponseField>
+
+<ResponseField name="networks[].average_confirmation_time" type="string">
+  Average confirmation time in minutes
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://api.railsfromthecrypt.com/v1/rates/networks"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/rates/networks');
+const data = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "networks": [
+    {
+      "id": "ethereum",
+      "name": "Ethereum",
+      "code": "ETH",
+      "type": "mainnet",
+      "chain_id": 1,
+      "native_currency": "ETH",
+      "supported_currencies": ["USDC", "USDT", "DAI"],
+      "min_transfer": "1.00",
+      "max_transfer": "1000000.00",
+      "gas_fee_estimate": {
+        "low": "0.001",
+        "medium": "0.002",
+        "high": "0.005"
+      },
+      "status": "active",
+      "confirmation_blocks": 12,
+      "average_confirmation_time": "3-5 minutes"
+    },
+    {
+      "id": "polygon",
+      "name": "Polygon",
+      "code": "MATIC",
+      "type": "mainnet",
+      "chain_id": 137,
+      "native_currency": "MATIC",
+      "supported_currencies": ["USDC", "USDT", "DAI"],
+      "min_transfer": "1.00",
+      "max_transfer": "1000000.00",
+      "gas_fee_estimate": {
+        "low": "0.0001",
+        "medium": "0.0002",
+        "high": "0.0005"
+      },
+      "status": "active",
+      "confirmation_blocks": 30,
+      "average_confirmation_time": "2-3 minutes"
+    },
+    {
+      "id": "bitcoin",
+      "name": "Bitcoin",
+      "code": "BTC",
+      "type": "mainnet",
+      "chain_id": null,
+      "native_currency": "BTC",
+      "supported_currencies": ["BTC"],
+      "min_transfer": "0.00001",
+      "max_transfer": "10.00",
+      "gas_fee_estimate": {
+        "low": "0.00001",
+        "medium": "0.00002",
+        "high": "0.00005"
+      },
+      "status": "active",
+      "confirmation_blocks": 6,
+      "average_confirmation_time": "10-60 minutes"
+    }
+  ]
+}
+```
+
+</ResponseExample>
+
+## Usage Examples
+
+### Get Active Networks Only
+
+<CodeGroup>
+
+```javascript JavaScript
+async function getActiveNetworks() {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/rates/networks');
+    const data = await response.json();
+    
+    return data.networks.filter(network => network.status === 'active');
+  } catch (error) {
+    console.error('Error fetching active networks:', error);
+    throw error;
+  }
+}
+
+// Usage
+const activeNetworks = await getActiveNetworks();
+console.log('Active networks:', activeNetworks);
+```
+
+</CodeGroup>
+
+### Get Networks for Specific Currency
+
+<CodeGroup>
+
+```javascript JavaScript
+async function getNetworksForCurrency(currencyCode) {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/rates/networks');
+    const data = await response.json();
+    
+    return data.networks.filter(network => 
+      network.supported_currencies.includes(currencyCode) &&
+      network.status === 'active'
+    );
+  } catch (error) {
+    console.error('Error fetching networks for currency:', error);
+    throw error;
+  }
+}
+
+// Usage
+const usdcNetworks = await getNetworksForCurrency('USDC');
+console.log('USDC supported networks:', usdcNetworks);
+```
+
+</CodeGroup>
+
+### Compare Network Fees
+
+<CodeGroup>
+
+```javascript JavaScript
+async function compareNetworkFees(currencyCode) {
+  try {
+    const networks = await getNetworksForCurrency(currencyCode);
+    
+    return networks.map(network => ({
+      name: network.name,
+      code: network.code,
+      low_fee: network.gas_fee_estimate.low,
+      medium_fee: network.gas_fee_estimate.medium,
+      high_fee: network.gas_fee_estimate.high,
+      confirmation_time: network.average_confirmation_time
+    })).sort((a, b) => parseFloat(a.medium_fee) - parseFloat(b.medium_fee));
+  } catch (error) {
+    console.error('Error comparing network fees:', error);
+    throw error;
+  }
+}
+
+// Usage
+const feeComparison = await compareNetworkFees('USDC');
+console.log('Network fee comparison:', feeComparison);
+```
+
+</CodeGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Supported Currencies"
+    icon="coins"
+    href="/api/rates/currencies"
+  >
+    Get list of supported currencies
+  </Card>
+  <Card
+    title="List Exchange Rates"
+    icon="list"
+    href="/api/rates/list"
+  >
+    Get current exchange rates
+  </Card>
+</CardGroup>

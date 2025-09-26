@@ -1,0 +1,93 @@
+---
+title: "Confirm Payment"
+api: "PATCH /v1/transfer-requests/{id}/confirm-payment"
+description: "Confirm payment for a transfer request"
+---
+
+## Overview
+
+Confirm that payment has been made for a transfer request. This moves the transfer from `pending` to `processing` status.
+
+<Note>
+This endpoint should be called after the user has completed the payment using the provided payment instructions.
+</Note>
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the transfer request
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Transfer request ID
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Updated transfer status (`processing`)
+</ResponseField>
+
+<ResponseField name="confirmed_at" type="string">
+  Payment confirmation timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Confirmation message
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X PATCH "https://api.railsfromthecrypt.com/v1/transfer-requests/tr_123e4567-e89b-12d3-a456-426614174000/confirm-payment" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/transfer-requests/tr_123e4567-e89b-12d3-a456-426614174000/confirm-payment', {
+  method: 'PATCH',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const result = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "id": "tr_123e4567-e89b-12d3-a456-426614174000",
+  "status": "processing",
+  "confirmed_at": "2024-01-01T12:05:00Z",
+  "message": "Payment confirmed successfully"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Transfer Request"
+    icon="search"
+    href="/api/transfer-requests/get"
+  >
+    Get specific transfer request details
+  </Card>
+  <Card
+    title="Create Transfer Request"
+    icon="plus"
+    href="/api/transfer-requests/create"
+  >
+    Create a new transfer request
+  </Card>
+</CardGroup>

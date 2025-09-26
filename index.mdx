@@ -1,0 +1,212 @@
+---
+title: "HR API Documentation"
+description: "Complete API documentation for HR (HashRails) - your gateway to seamless financial operations"
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.svg"
+  alt="Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.svg"
+  alt="Hero Dark"
+/>
+
+## Welcome to HR API
+
+HR (HashRails) API is a comprehensive financial operations platform that provides secure, scalable, and efficient solutions for businesses looking to integrate financial services into their applications. Our API enables you to handle virtual accounts, process transactions, manage customers, and much more.
+
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get up and running with HR API in minutes
+  </Card>
+  <Card
+    title="Authentication"
+    icon="shield-check"
+    href="/authentication"
+  >
+    Learn how to authenticate and secure your API calls
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api/auth/login"
+  >
+    Complete reference for all API endpoints
+  </Card>
+  <Card
+    title="Webhooks"
+    icon="webhook"
+    href="/concepts/webhooks"
+  >
+    Set up real-time notifications for your application
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<AccordionGroup>
+  <Accordion title="Virtual Accounts">
+    Create and manage virtual accounts for receiving payments from customers. Support for multiple currencies and payment providers including Nomba, Bridge, Juicyway, and Alatpay.
+  </Accordion>
+  <Accordion title="Transaction Management">
+    Process and track financial transactions with real-time status updates and comprehensive transaction history.
+  </Accordion>
+  <Accordion title="Customer Onboarding">
+    Streamlined customer onboarding with KYC/KYB verification through integrated providers like Sumsub.
+  </Accordion>
+  <Accordion title="Multi-Currency Support">
+    Support for major fiat currencies (NGN, USD, EUR, GBP, GHS, KES, ZAR) and cryptocurrencies (USDC, USDT, BTC, ETH, BNB, MATIC).
+  </Accordion>
+  <Accordion title="Real-time Notifications">
+    WebSocket connections and webhook notifications for real-time updates on transactions and account activities.
+  </Accordion>
+  <Accordion title="Security & Compliance">
+    Enterprise-grade security with 2FA support, IP whitelisting, and compliance with financial regulations.
+  </Accordion>
+</AccordionGroup>
+
+## Base URLs
+
+<Warning>
+Always use HTTPS for all API requests. HTTP requests will be rejected.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Production" icon="globe">
+    ```
+    https://api.hashrails.xyz
+    ```
+  </Card>
+  <Card title="Staging" icon="flask">
+    ```
+    https://api.railsfromthecrypt.com
+    ```
+  </Card>
+</CardGroup>
+
+## Authentication
+
+HR API uses JWT (JSON Web Tokens) for authentication. Include your access token in the Authorization header:
+
+```bash
+Authorization: Bearer <your_access_token>
+```
+
+<Note>
+Access tokens expire after 2 hours. Use refresh tokens to obtain new access tokens without requiring user re-authentication.
+</Note>
+
+## Rate Limiting
+
+API requests are rate-limited to ensure fair usage and system stability:
+
+- **Authenticated requests**: 1000 requests per hour per user
+- **Unauthenticated requests**: 100 requests per hour per IP
+- **Webhook endpoints**: 1000 requests per hour per client
+
+<Info>
+Rate limit headers are included in all responses:
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Remaining requests in current window
+- `X-RateLimit-Reset`: Time when the rate limit resets
+</Info>
+
+## Response Format
+
+All API responses follow a consistent JSON format:
+
+<CodeGroup>
+
+```json Success Response
+{
+  "success": true,
+  "message": "Operation completed successfully",
+  "data": {
+    // Response data here
+  }
+}
+```
+
+```json Error Response
+{
+  "success": false,
+  "message": "Error description",
+  "error": {
+    "code": "ERROR_CODE",
+    "details": "Additional error details"
+  }
+}
+```
+
+</CodeGroup>
+
+## HTTP Status Codes
+
+<CardGroup cols={2}>
+  <Card title="2xx Success" icon="check-circle">
+    - **200**: OK - Request successful
+    - **201**: Created - Resource created successfully
+    - **204**: No Content - Request successful, no content returned
+  </Card>
+  <Card title="4xx Client Error" icon="exclamation-triangle">
+    - **400**: Bad Request - Invalid request parameters
+    - **401**: Unauthorized - Invalid or missing authentication
+    - **403**: Forbidden - Insufficient permissions
+    - **404**: Not Found - Resource not found
+    - **429**: Too Many Requests - Rate limit exceeded
+  </Card>
+  <Card title="5xx Server Error" icon="server">
+    - **500**: Internal Server Error - Server error occurred
+    - **502**: Bad Gateway - Upstream server error
+    - **503**: Service Unavailable - Service temporarily unavailable
+  </Card>
+  <Card title="Special Codes" icon="info-circle">
+    - **402**: Payment Required - 2FA verification required
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+Ready to start building? Here's what you need to do:
+
+1. **Get API Access**: Contact our team to get your API credentials
+2. **Authenticate**: Use the login endpoint to get your access token
+3. **Make Your First Request**: Try the health check endpoint to verify connectivity
+4. **Explore the API**: Use our interactive API reference to test endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Start Building"
+    icon="code"
+    href="/quickstart"
+  >
+    Follow our quickstart guide to make your first API call
+  </Card>
+  <Card
+    title="Join Our Community"
+    icon="users"
+    href="https://discord.gg/hashrails"
+  >
+    Get help from our community and share your projects
+  </Card>
+</CardGroup>
+
+## Support
+
+Need help? We're here to assist you:
+
+- **Documentation**: Browse our comprehensive guides and API reference
+- **Email Support**: [support@hashrails.xyz](mailto:support@hashrails.xyz)
+- **Status Page**: [status.hashrails.xyz](https://status.hashrails.xyz)
+- **Community**: Join our Discord server for discussions and support
+
+<Note>
+For production issues or urgent support, please email us directly. We typically respond within 24 hours.
+</Note>

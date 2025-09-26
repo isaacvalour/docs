@@ -1,0 +1,277 @@
+---
+title: "List Recipients"
+api: "GET /v1/recipients"
+description: "Get list of all recipients with filtering and pagination"
+---
+
+## Overview
+
+Retrieve a paginated list of all recipients (both fiat and crypto) with optional filtering and sorting capabilities.
+
+<Note>
+This endpoint returns both fiat and cryptocurrency recipients. Use the `type` parameter to filter by recipient type.
+</Note>
+
+## Query Parameters
+
+<ParamField query="limit" type="number">
+  Number of recipients to return (default: 20, max: 100)
+</ParamField>
+
+<ParamField query="offset" type="number">
+  Number of recipients to skip (default: 0)
+</ParamField>
+
+<ParamField query="type" type="string">
+  Filter by recipient type (`fiat`, `crypto`)
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by recipient status (`active`, `pending`, `suspended`, `rejected`)
+</ParamField>
+
+<ParamField query="currency" type="string">
+  Filter by currency code
+</ParamField>
+
+<ParamField query="country" type="string">
+  Filter by country code (fiat recipients only)
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name or email
+</ParamField>
+
+<ParamField query="sort" type="string">
+  Sort order (`created_at`, `-created_at`, `name`, `-name`)
+</ParamField>
+
+## Response
+
+<ResponseField name="recipients" type="array">
+  Array of recipient objects
+</ResponseField>
+
+<ResponseField name="recipients[].id" type="string">
+  Unique identifier for the recipient
+</ResponseField>
+
+<ResponseField name="recipients[].name" type="string">
+  Full name of the recipient
+</ResponseField>
+
+<ResponseField name="recipients[].email" type="string">
+  Email address of the recipient
+</ResponseField>
+
+<ResponseField name="recipients[].type" type="string">
+  Recipient type (`fiat`, `crypto`)
+</ResponseField>
+
+<ResponseField name="recipients[].currency" type="string">
+  Currency code
+</ResponseField>
+
+<ResponseField name="recipients[].status" type="string">
+  Recipient status
+</ResponseField>
+
+<ResponseField name="recipients[].created_at" type="string">
+  Creation timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination information
+</ResponseField>
+
+<ResponseField name="pagination.total" type="number">
+  Total number of recipients
+</ResponseField>
+
+<ResponseField name="pagination.limit" type="number">
+  Number of items per page
+</ResponseField>
+
+<ResponseField name="pagination.offset" type="number">
+  Number of items skipped
+</ResponseField>
+
+<ResponseField name="pagination.has_more" type="boolean">
+  Whether there are more items available
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+# Get all recipients
+curl -X GET "https://api.railsfromthecrypt.com/v1/recipients" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get fiat recipients only
+curl -X GET "https://api.railsfromthecrypt.com/v1/recipients?type=fiat" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Search recipients
+curl -X GET "https://api.railsfromthecrypt.com/v1/recipients?search=john&limit=10" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+// Get all recipients
+const response = await fetch('https://api.railsfromthecrypt.com/v1/recipients', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+
+// Get fiat recipients with pagination
+const fiatResponse = await fetch('https://api.railsfromthecrypt.com/v1/recipients?type=fiat&limit=20&offset=0', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const fiatData = await fiatResponse.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "recipients": [
+    {
+      "id": "rec_123e4567-e89b-12d3-a456-426614174000",
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "type": "fiat",
+      "currency": "USD",
+      "status": "active",
+      "created_at": "2024-01-01T12:00:00Z"
+    },
+    {
+      "id": "rec_crypto_123e4567-e89b-12d3-a456-426614174001",
+      "name": "Alice Johnson",
+      "email": "alice@example.com",
+      "type": "crypto",
+      "currency": "USDC",
+      "status": "active",
+      "created_at": "2024-01-01T11:30:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 2,
+    "limit": 20,
+    "offset": 0,
+    "has_more": false
+  }
+}
+```
+
+</ResponseExample>
+
+## Usage Examples
+
+### Get All Recipients with Pagination
+
+<CodeGroup>
+
+```javascript JavaScript
+async function getAllRecipients(limit = 20, offset = 0) {
+  try {
+    const response = await fetch(`https://api.railsfromthecrypt.com/v1/recipients?limit=${limit}&offset=${offset}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recipients');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching recipients:', error);
+    throw error;
+  }
+}
+
+// Usage
+const recipients = await getAllRecipients(50, 0);
+console.log(`Found ${recipients.pagination.total} recipients`);
+```
+
+</CodeGroup>
+
+### Filter Recipients by Type
+
+<CodeGroup>
+
+```javascript JavaScript
+async function getRecipientsByType(type) {
+  try {
+    const response = await fetch(`https://api.railsfromthecrypt.com/v1/recipients?type=${type}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recipients');
+    }
+
+    const data = await response.json();
+    return data.recipients;
+  } catch (error) {
+    console.error('Error fetching recipients by type:', error);
+    throw error;
+  }
+}
+
+// Usage
+const fiatRecipients = await getRecipientsByType('fiat');
+const cryptoRecipients = await getRecipientsByType('crypto');
+```
+
+</CodeGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Fiat Recipient"
+    icon="credit-card"
+    href="/api/recipients/fiat"
+  >
+    Create a fiat currency recipient
+  </Card>
+  <Card
+    title="Create Crypto Recipient"
+    icon="bitcoin"
+    href="/api/recipients/crypto"
+  >
+    Create a cryptocurrency recipient
+  </Card>
+  <Card
+    title="Get Recipient"
+    icon="search"
+    href="/api/recipients/get"
+  >
+    Get specific recipient details
+  </Card>
+  <Card
+    title="Delete Recipient"
+    icon="trash"
+    href="/api/recipients/delete"
+  >
+    Delete a recipient
+  </Card>
+</CardGroup>

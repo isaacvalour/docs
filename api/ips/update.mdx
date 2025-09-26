@@ -1,0 +1,124 @@
+---
+title: "Update IP Address"
+api: "PATCH /v1/ips/{id}"
+description: "Update IP address details"
+---
+
+## Overview
+
+Update the label, description, or status of an existing whitelisted IP address.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the IP address
+</ParamField>
+
+## Request Body
+
+<ParamField body="label" type="string">
+  New label for the IP address
+</ParamField>
+
+<ParamField body="description" type="string">
+  New description for the IP address
+</ParamField>
+
+<ParamField body="active" type="boolean">
+  Whether the IP address is active
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  IP address ID
+</ResponseField>
+
+<ResponseField name="ip_address" type="string">
+  IP address or range
+</ResponseField>
+
+<ResponseField name="label" type="string">
+  Updated label
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Updated description
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Updated status
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+  Update timestamp (ISO 8601)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X PATCH "https://api.railsfromthecrypt.com/v1/ips/ip_123e4567-e89b-12d3-a456-426614174000" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "Updated Office Network",
+    "description": "Updated description"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/ips/ip_123e4567-e89b-12d3-a456-426614174000', {
+  method: 'PATCH',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    label: 'Updated Office Network',
+    description: 'Updated description'
+  })
+});
+
+const result = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "id": "ip_123e4567-e89b-12d3-a456-426614174000",
+  "ip_address": "192.168.1.100",
+  "label": "Updated Office Network",
+  "description": "Updated description",
+  "status": "active",
+  "updated_at": "2024-01-01T12:30:00Z"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Get IP Address"
+    icon="search"
+    href="/api/ips/get"
+  >
+    Get specific IP address details
+  </Card>
+  <Card
+    title="Delete IP Address"
+    icon="trash"
+    href="/api/ips/delete"
+  >
+    Remove IP address from whitelist
+  </Card>
+</CardGroup>
+

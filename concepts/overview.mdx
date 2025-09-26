@@ -1,0 +1,314 @@
+---
+title: "API Overview"
+description: "Understanding the core concepts and architecture of HR API"
+---
+
+## Introduction
+
+HR API is a comprehensive financial operations platform designed to provide secure, scalable, and efficient solutions for businesses. This overview covers the core concepts, architecture, and key features that make up the HR API ecosystem.
+
+## Core Concepts
+
+### Virtual Accounts
+
+Virtual accounts are temporary or permanent bank account numbers that allow you to receive payments from customers without needing a physical bank account. They're perfect for:
+
+- **E-commerce platforms**: Accept payments from customers
+- **Marketplace applications**: Collect fees and commissions
+- **SaaS applications**: Handle subscription payments
+- **Freelance platforms**: Manage escrow and payments
+
+<CardGroup cols={2}>
+  <Card title="USD Virtual Accounts" icon="dollar-sign">
+    - Bridge integration for US banking
+    - ACH and wire transfer support
+    - Real-time transaction notifications
+    - KYC verification required
+  </Card>
+  <Card title="NGN Virtual Accounts" icon="naira-sign">
+    - Multiple provider support (Nomba, Juicyway, Alatpay)
+    - Local bank transfer support
+    - Instant settlement
+    - No KYC required for basic accounts
+  </Card>
+</CardGroup>
+
+### Transactions
+
+Transactions represent the movement of money through the HR API system. They can be:
+
+- **Incoming**: Payments received into virtual accounts
+- **Outgoing**: Transfers sent to recipients
+- **Internal**: Account-to-account transfers
+- **Exchange**: Currency conversions
+
+<Info>
+All transactions are tracked with unique references and provide real-time status updates through webhooks and WebSocket connections.
+</Info>
+
+### Customers
+
+Customers are the end users of your application who interact with financial services. The HR API provides:
+
+- **KYC/KYB verification**: Through integrated providers like Sumsub
+- **Customer management**: Create, update, and track customer information
+- **Verification workflows**: Automated compliance checks
+- **Document management**: Secure storage of verification documents
+
+### Recipients
+
+Recipients are the destinations for outgoing payments. They can be:
+
+- **Crypto recipients**: Blockchain addresses for cryptocurrency transfers
+- **Fiat recipients**: Bank accounts for traditional currency transfers
+- **Internal recipients**: Other users within your platform
+
+## API Architecture
+
+### RESTful Design
+
+HR API follows REST principles with:
+
+- **Resource-based URLs**: Clear, predictable endpoint structure
+- **HTTP methods**: GET, POST, PUT, PATCH, DELETE for different operations
+- **Status codes**: Standard HTTP status codes for responses
+- **JSON format**: Consistent request/response format
+
+### Authentication & Security
+
+<AccordionGroup>
+  <Accordion title="JWT Tokens">
+    - Access tokens for API authentication (2-hour expiration)
+    - Refresh tokens for token renewal (long-lived)
+    - Secure token storage and transmission
+  </Accordion>
+  <Accordion title="Two-Factor Authentication">
+    - TOTP-based 2FA support
+    - QR code generation for authenticator apps
+    - Optional but recommended for production accounts
+  </Accordion>
+  <Accordion title="IP Whitelisting">
+    - Restrict API access to specific IP addresses
+    - Environment-specific whitelisting (live/sandbox)
+    - Enhanced security for production environments
+  </Accordion>
+  <Accordion title="Rate Limiting">
+    - 1000 requests per hour for authenticated users
+    - 100 requests per hour for unauthenticated requests
+    - Webhook-specific rate limits
+  </Accordion>
+</AccordionGroup>
+
+### Real-time Communication
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" icon="webhook">
+    - HTTP POST notifications for events
+    - Configurable endpoints and events
+    - Retry mechanism for failed deliveries
+    - Signature verification for security
+  </Card>
+  <Card title="WebSocket" icon="wifi">
+    - Real-time bidirectional communication
+    - Transaction status updates
+    - Rate change notifications
+    - Connection health monitoring
+  </Card>
+</CardGroup>
+
+## Data Flow
+
+### Payment Processing Flow
+
+<Steps>
+  <Step title="Customer Initiation">
+    Customer initiates payment through your application
+  </Step>
+  <Step title="Virtual Account Assignment">
+    System assigns or creates a virtual account for the customer
+  </Step>
+  <Step title="Payment Processing">
+    Customer sends payment to the virtual account
+  </Step>
+  <Step title="Notification">
+    Webhook/WebSocket notification sent to your application
+  </Step>
+  <Step title="Settlement">
+    Funds are settled to your designated account
+  </Step>
+</Steps>
+
+### Transaction Flow
+
+<Steps>
+  <Step title="Transaction Creation">
+    Create a transfer request with recipient and amount details
+  </Step>
+  <Step title="Rate Calculation">
+    System calculates exchange rates and fees
+  </Step>
+  <Step title="Payment Confirmation">
+    Confirm payment has been received
+  </Step>
+  <Step title="Processing">
+    Transaction is processed and sent to recipient
+  </Step>
+  <Step title="Completion">
+    Transaction marked as completed with confirmation
+  </Step>
+</Steps>
+
+## Supported Currencies
+
+### Fiat Currencies
+
+<CardGroup cols={2}>
+  <Card title="African Currencies" icon="globe-africa">
+    - **NGN**: Nigerian Naira
+    - **GHS**: Ghanaian Cedi
+    - **KES**: Kenyan Shilling
+    - **ZAR**: South African Rand
+  </Card>
+  <Card title="International Currencies" icon="globe">
+    - **USD**: US Dollar
+    - **EUR**: Euro
+    - **GBP**: British Pound Sterling
+  </Card>
+</CardGroup>
+
+### Cryptocurrencies
+
+<CardGroup cols={2}>
+  <Card title="Stablecoins" icon="coins">
+    - **USDC**: USD Coin
+    - **USDT**: Tether
+  </Card>
+  <Card title="Major Cryptocurrencies" icon="bitcoin">
+    - **BTC**: Bitcoin
+    - **ETH**: Ethereum
+    - **BNB**: Binance Coin
+    - **MATIC**: Polygon
+  </Card>
+</CardGroup>
+
+## Provider Integrations
+
+HR API integrates with multiple payment providers to ensure reliability and coverage:
+
+<AccordionGroup>
+  <Accordion title="Bridge (USD)">
+    - US banking integration
+    - ACH and wire transfers
+    - Real-time account creation
+    - Comprehensive transaction tracking
+  </Accordion>
+  <Accordion title="Nomba (NGN)">
+    - Nigerian banking network
+    - Instant transfers
+    - High transaction volumes
+    - Local market expertise
+  </Accordion>
+  <Accordion title="Juicyway (NGN)">
+    - Alternative Nigerian provider
+    - Competitive rates
+    - Reliable service
+    - Backup provider option
+  </Accordion>
+  <Accordion title="Alatpay (NGN)">
+    - Wema Bank integration
+    - Secure transactions
+    - Local banking support
+    - Additional coverage
+  </Accordion>
+  <Accordion title="Sumsub (KYC/KYB)">
+    - Global compliance provider
+    - Document verification
+    - Identity verification
+    - Risk assessment
+  </Accordion>
+</AccordionGroup>
+
+## Environment Management
+
+### Staging Environment
+
+- **Base URL**: `https://api.railsfromthecrypt.com`
+- **Purpose**: Development and testing
+- **Features**: Full API functionality with test data
+- **Limitations**: No real money transactions
+
+### Production Environment
+
+- **Base URL**: `https://api.hashrails.xyz`
+- **Purpose**: Live production use
+- **Features**: Full functionality with real transactions
+- **Requirements**: Complete verification and compliance
+
+<Warning>
+Always test thoroughly in the staging environment before deploying to production. Production transactions involve real money and cannot be reversed.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Security">
+    - Use HTTPS for all API requests
+    - Store credentials securely (environment variables)
+    - Implement proper error handling
+    - Enable 2FA for production accounts
+    - Use IP whitelisting for enhanced security
+  </Accordion>
+  <Accordion title="Performance">
+    - Implement proper caching strategies
+    - Use pagination for large data sets
+    - Handle rate limits gracefully
+    - Monitor API usage and performance
+  </Accordion>
+  <Accordion title="Reliability">
+    - Implement retry logic for failed requests
+    - Use webhooks for real-time updates
+    - Handle network timeouts appropriately
+    - Monitor webhook delivery success
+  </Accordion>
+  <Accordion title="Compliance">
+    - Follow KYC/KYB requirements
+    - Maintain audit trails
+    - Implement proper data retention
+    - Ensure regulatory compliance
+  </Accordion>
+</AccordionGroup>
+
+## Getting Started
+
+Ready to start building with HR API? Here are the next steps:
+
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get up and running in minutes
+  </Card>
+  <Card
+    title="Authentication"
+    icon="shield-check"
+    href="/authentication"
+  >
+    Learn about security and authentication
+  </Card>
+  <Card
+    title="Virtual Accounts"
+    icon="credit-card"
+    href="/guides/virtual-accounts"
+  >
+    Set up payment collection
+  </Card>
+  <Card
+    title="Webhooks"
+    icon="webhook"
+    href="/concepts/webhooks"
+  >
+    Configure real-time notifications
+  </Card>
+</CardGroup>

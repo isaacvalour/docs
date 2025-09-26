@@ -1,0 +1,148 @@
+---
+title: "API Key Logs"
+api: "GET /v1/api-keys/{id}/logs"
+description: "Get usage logs for a specific API key"
+---
+
+## Overview
+
+Retrieve usage logs for a specific API key, including request details, timestamps, and response codes.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the API key
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="limit" type="number">
+  Number of log entries to return (default: 50, max: 200)
+</ParamField>
+
+<ParamField query="offset" type="number">
+  Number of log entries to skip (default: 0)
+</ParamField>
+
+<ParamField query="start_date" type="string">
+  Filter logs from this date (ISO 8601)
+</ParamField>
+
+<ParamField query="end_date" type="string">
+  Filter logs until this date (ISO 8601)
+</ParamField>
+
+<ParamField query="status_code" type="number">
+  Filter by HTTP status code
+</ParamField>
+
+## Response
+
+<ResponseField name="logs" type="array">
+  Array of log entry objects
+</ResponseField>
+
+<ResponseField name="logs[].id" type="string">
+  Log entry ID
+</ResponseField>
+
+<ResponseField name="logs[].method" type="string">
+  HTTP method used
+</ResponseField>
+
+<ResponseField name="logs[].endpoint" type="string">
+  API endpoint called
+</ResponseField>
+
+<ResponseField name="logs[].status_code" type="number">
+  HTTP response status code
+</ResponseField>
+
+<ResponseField name="logs[].response_time" type="number">
+  Response time in milliseconds
+</ResponseField>
+
+<ResponseField name="logs[].ip_address" type="string">
+  IP address of the request
+</ResponseField>
+
+<ResponseField name="logs[].user_agent" type="string">
+  User agent string
+</ResponseField>
+
+<ResponseField name="logs[].timestamp" type="string">
+  Request timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination information
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://api.railsfromthecrypt.com/v1/api-keys/ak_123e4567-e89b-12d3-a456-426614174000/logs" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/api-keys/ak_123e4567-e89b-12d3-a456-426614174000/logs', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "logs": [
+    {
+      "id": "log_123e4567-e89b-12d3-a456-426614174000",
+      "method": "GET",
+      "endpoint": "/v1/transactions",
+      "status_code": 200,
+      "response_time": 150,
+      "ip_address": "192.168.1.100",
+      "user_agent": "MyApp/1.0.0",
+      "timestamp": "2024-01-01T12:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "limit": 50,
+    "offset": 0,
+    "has_more": false
+  }
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Get API Key"
+    icon="search"
+    href="/api/api-keys/get"
+  >
+    Get specific API key details
+  </Card>
+  <Card
+    title="List API Keys"
+    icon="list"
+    href="/api/api-keys/list"
+  >
+    Get list of all API keys
+  </Card>
+</CardGroup>

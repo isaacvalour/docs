@@ -1,0 +1,174 @@
+---
+title: "WebSocket Health"
+api: "GET /v1/websocket/health"
+description: "Check WebSocket service health and status"
+---
+
+## Overview
+
+Check the health and status of the WebSocket service. This endpoint provides information about WebSocket connectivity, performance, and overall service health.
+
+<Note>
+This endpoint does not require authentication and can be used for monitoring WebSocket service availability.
+</Note>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Overall WebSocket service status (`healthy`, `degraded`, `unhealthy`)
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  Current server timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="version" type="string">
+  WebSocket service version
+</ResponseField>
+
+<ResponseField name="uptime" type="number">
+  Service uptime in seconds
+</ResponseField>
+
+<ResponseField name="active_connections" type="number">
+  Number of currently active WebSocket connections
+</ResponseField>
+
+<ResponseField name="total_connections" type="number">
+  Total number of connections since service start
+</ResponseField>
+
+<ResponseField name="average_response_time" type="number">
+  Average WebSocket response time in milliseconds
+</ResponseField>
+
+<ResponseField name="message_throughput" type="object">
+  Message throughput statistics
+</ResponseField>
+
+<ResponseField name="message_throughput.per_second" type="number">
+  Messages processed per second
+</ResponseField>
+
+<ResponseField name="message_throughput.per_minute" type="number">
+  Messages processed per minute
+</ResponseField>
+
+<ResponseField name="error_rate" type="number">
+  Error rate percentage (0-100)
+</ResponseField>
+
+<ResponseField name="memory_usage" type="object">
+  Memory usage statistics
+</ResponseField>
+
+<ResponseField name="memory_usage.used" type="number">
+  Used memory in bytes
+</ResponseField>
+
+<ResponseField name="memory_usage.total" type="number">
+  Total available memory in bytes
+</ResponseField>
+
+<ResponseField name="memory_usage.percentage" type="number">
+  Memory usage percentage (0-100)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://api.railsfromthecrypt.com/v1/websocket/health"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/websocket/health');
+const health = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "version": "1.2.3",
+  "uptime": 86400,
+  "active_connections": 150,
+  "total_connections": 1250,
+  "average_response_time": 25,
+  "message_throughput": {
+    "per_second": 500,
+    "per_minute": 30000
+  },
+  "error_rate": 0.1,
+  "memory_usage": {
+    "used": 1073741824,
+    "total": 2147483648,
+    "percentage": 50.0
+  }
+}
+```
+
+</ResponseExample>
+
+## Usage Examples
+
+### Monitor WebSocket Health
+
+<CodeGroup>
+
+```javascript JavaScript
+async function checkWebSocketHealth() {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/websocket/health');
+    const health = await response.json();
+    
+    // Update UI based on health status
+    updateHealthStatus(health.status);
+    updateConnectionStats(health.active_connections, health.total_connections);
+    updatePerformanceMetrics(health.average_response_time, health.error_rate);
+    
+    return health;
+  } catch (error) {
+    console.error('Error checking WebSocket health:', error);
+    throw error;
+  }
+}
+
+function updateHealthStatus(status) {
+  const statusElement = document.getElementById('websocket-status');
+  statusElement.textContent = status;
+  statusElement.className = `status-${status}`;
+}
+
+// Check health every 30 seconds
+setInterval(checkWebSocketHealth, 30000);
+```
+
+</CodeGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="WebSocket Connections"
+    icon="network-wired"
+    href="/api/websocket/connections"
+  >
+    Get active WebSocket connections
+  </Card>
+  <Card
+    title="WebSocket Subscriptions"
+    icon="rss"
+    href="/api/websocket/subscriptions"
+  >
+    Get WebSocket subscription information
+  </Card>
+</CardGroup>
+

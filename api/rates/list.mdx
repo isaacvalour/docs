@@ -1,0 +1,267 @@
+---
+title: "List Exchange Rates"
+api: "GET /v1/rates"
+description: "Get current exchange rates for supported currency pairs"
+---
+
+## Overview
+
+Retrieve current exchange rates for all supported currency pairs. Rates are updated in real-time and include both buy and sell rates.
+
+<Note>
+Exchange rates are valid for a limited time (typically 5 minutes). Always check the `expires_at` field before using rates for transactions.
+</Note>
+
+## Query Parameters
+
+<ParamField query="from_currency" type="string">
+  Filter rates by source currency (e.g., `"USD"`, `"NGN"`)
+</ParamField>
+
+<ParamField query="to_currency" type="string">
+  Filter rates by destination currency (e.g., `"USDC"`, `"EUR"`)
+</ParamField>
+
+<ParamField query="pair" type="string">
+  Filter by specific currency pair (e.g., `"USD/USDC"`)
+</ParamField>
+
+<ParamField query="include_fees" type="boolean">
+  Include fee information in response (default: false)
+</ParamField>
+
+## Response
+
+<ResponseField name="rates" type="array">
+  Array of exchange rate objects
+</ResponseField>
+
+<ResponseField name="rates[].pair" type="string">
+  Currency pair (e.g., `"USD/USDC"`)
+</ResponseField>
+
+<ResponseField name="rates[].from_currency" type="string">
+  Source currency code
+</ResponseField>
+
+<ResponseField name="rates[].to_currency" type="string">
+  Destination currency code
+</ResponseField>
+
+<ResponseField name="rates[].buy_rate" type="string">
+  Rate for buying the destination currency
+</ResponseField>
+
+<ResponseField name="rates[].sell_rate" type="string">
+  Rate for selling the source currency
+</ResponseField>
+
+<ResponseField name="rates[].mid_rate" type="string">
+  Mid-market rate (average of buy and sell)
+</ResponseField>
+
+<ResponseField name="rates[].fees" type="object">
+  Fee information (if include_fees=true)
+</ResponseField>
+
+<ResponseField name="rates[].fees.fixed" type="string">
+  Fixed fee amount
+</ResponseField>
+
+<ResponseField name="rates[].fees.percentage" type="string">
+  Percentage fee rate
+</ResponseField>
+
+<ResponseField name="rates[].expires_at" type="string">
+  Rate expiration timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="rates[].updated_at" type="string">
+  Last update timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  Response timestamp (ISO 8601)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+# Get all rates
+curl -X GET "https://api.railsfromthecrypt.com/v1/rates" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get rates for specific pair
+curl -X GET "https://api.railsfromthecrypt.com/v1/rates?pair=USD/USDC" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get rates with fees
+curl -X GET "https://api.railsfromthecrypt.com/v1/rates?include_fees=true" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+// Get all rates
+const response = await fetch('https://api.railsfromthecrypt.com/v1/rates', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+
+// Get rates for specific currency
+const usdRates = await fetch('https://api.railsfromthecrypt.com/v1/rates?from_currency=USD', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const usdData = await usdRates.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "rates": [
+    {
+      "pair": "USD/USDC",
+      "from_currency": "USD",
+      "to_currency": "USDC",
+      "buy_rate": "1.0000",
+      "sell_rate": "0.9990",
+      "mid_rate": "0.9995",
+      "fees": {
+        "fixed": "0.00",
+        "percentage": "0.1"
+      },
+      "expires_at": "2024-01-01T12:05:00Z",
+      "updated_at": "2024-01-01T12:00:00Z"
+    },
+    {
+      "pair": "NGN/USDC",
+      "from_currency": "NGN",
+      "to_currency": "USDC",
+      "buy_rate": "0.0008",
+      "sell_rate": "0.0007",
+      "mid_rate": "0.00075",
+      "fees": {
+        "fixed": "50.00",
+        "percentage": "0.5"
+      },
+      "expires_at": "2024-01-01T12:05:00Z",
+      "updated_at": "2024-01-01T12:00:00Z"
+    }
+  ],
+  "timestamp": "2024-01-01T12:00:00Z"
+}
+```
+
+</ResponseExample>
+
+## Usage Examples
+
+### Get Rates for Specific Pair
+
+<CodeGroup>
+
+```javascript JavaScript
+async function getExchangeRate(fromCurrency, toCurrency) {
+  try {
+    const response = await fetch(`https://api.railsfromthecrypt.com/v1/rates?from_currency=${fromCurrency}&to_currency=${toCurrency}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch exchange rates');
+    }
+
+    const data = await response.json();
+    
+    if (data.rates.length === 0) {
+      throw new Error('No rates found for this currency pair');
+    }
+
+    return data.rates[0];
+  } catch (error) {
+    console.error('Error fetching exchange rate:', error);
+    throw error;
+  }
+}
+
+// Usage
+const rate = await getExchangeRate('USD', 'USDC');
+console.log(`1 USD = ${rate.buy_rate} USDC`);
+```
+
+</CodeGroup>
+
+### Check Rate Validity
+
+<CodeGroup>
+
+```javascript JavaScript
+function isRateValid(rate) {
+  const now = new Date();
+  const expiresAt = new Date(rate.expires_at);
+  
+  return now < expiresAt;
+}
+
+async function getValidRates() {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/rates', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    const data = await response.json();
+    
+    // Filter out expired rates
+    const validRates = data.rates.filter(isRateValid);
+    
+    return validRates;
+  } catch (error) {
+    console.error('Error fetching valid rates:', error);
+    throw error;
+  }
+}
+```
+
+</CodeGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Rate Calculator"
+    icon="calculator"
+    href="/api/rates/calculator"
+  >
+    Calculate exchange amounts with fees
+  </Card>
+  <Card
+    title="Supported Currencies"
+    icon="coins"
+    href="/api/rates/currencies"
+  >
+    Get list of supported currencies
+  </Card>
+  <Card
+    title="Supported Networks"
+    icon="network-wired"
+    href="/api/rates/networks"
+  >
+    Get list of supported networks
+  </Card>
+</CardGroup>

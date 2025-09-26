@@ -1,0 +1,183 @@
+---
+title: "Create Crypto Recipient"
+api: "POST /v1/recipients/crypto"
+description: "Create a new cryptocurrency recipient for transfers"
+---
+
+## Overview
+
+Create a new cryptocurrency recipient that can receive digital currency transfers. Crypto recipients require wallet addresses and network information.
+
+<Note>
+Crypto recipients are validated for address format and network compatibility. Ensure the address is correct as transactions cannot be reversed.
+</Note>
+
+## Request Body
+
+<ParamField body="name" type="string" required>
+  Full name of the recipient
+</ParamField>
+
+<ParamField body="email" type="string" required>
+  Email address of the recipient
+</ParamField>
+
+<ParamField body="currency" type="string" required>
+  Cryptocurrency code (e.g., `"BTC"`, `"ETH"`, `"USDC"`)
+</ParamField>
+
+<ParamField body="wallet_address" type="string" required>
+  Cryptocurrency wallet address
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Blockchain network (e.g., `"Bitcoin"`, `"Ethereum"`, `"Polygon"`)
+</ParamField>
+
+<ParamField body="memo" type="string">
+  Optional memo or tag for the address
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Additional metadata for the recipient
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique identifier for the recipient
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Full name of the recipient
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Email address of the recipient
+</ResponseField>
+
+<ResponseField name="currency" type="string">
+  Cryptocurrency code
+</ResponseField>
+
+<ResponseField name="wallet_address" type="string">
+  Cryptocurrency wallet address
+</ResponseField>
+
+<ResponseField name="network" type="string">
+  Blockchain network
+</ResponseField>
+
+<ResponseField name="memo" type="string">
+  Memo or tag for the address
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Recipient status (`active`, `pending`, `suspended`)
+</ResponseField>
+
+<ResponseField name="verification_status" type="string">
+  Address verification status (`pending`, `verified`, `failed`)
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Recipient creation timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+  Last update timestamp (ISO 8601)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.railsfromthecrypt.com/v1/recipients/crypto" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Alice Johnson",
+    "email": "alice@example.com",
+    "currency": "USDC",
+    "wallet_address": "0x1234567890abcdef1234567890abcdef12345678",
+    "network": "Polygon",
+    "memo": "Payment for services"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/recipients/crypto', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Alice Johnson',
+    email: 'alice@example.com',
+    currency: 'USDC',
+    wallet_address: '0x1234567890abcdef1234567890abcdef12345678',
+    network: 'Polygon',
+    memo: 'Payment for services'
+  })
+});
+
+const recipient = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "id": "rec_crypto_123e4567-e89b-12d3-a456-426614174000",
+  "name": "Alice Johnson",
+  "email": "alice@example.com",
+  "currency": "USDC",
+  "wallet_address": "0x1234567890abcdef1234567890abcdef12345678",
+  "network": "Polygon",
+  "memo": "Payment for services",
+  "status": "active",
+  "verification_status": "verified",
+  "created_at": "2024-01-01T12:00:00Z",
+  "updated_at": "2024-01-01T12:00:00Z"
+}
+```
+
+</ResponseExample>
+
+## Error Responses
+
+<CardGroup cols={2}>
+  <Card title="400 Bad Request" icon="exclamation-triangle">
+    - **INVALID_ADDRESS**: Invalid wallet address format
+    - **UNSUPPORTED_CURRENCY**: Currency not supported
+    - **INVALID_NETWORK**: Network not supported for currency
+  </Card>
+  <Card title="401 Unauthorized" icon="shield-exclamation">
+    - **INVALID_TOKEN**: Invalid or expired access token
+  </Card>
+</CardGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Fiat Recipient"
+    icon="credit-card"
+    href="/api/recipients/fiat"
+  >
+    Create a fiat currency recipient
+  </Card>
+  <Card
+    title="List Recipients"
+    icon="list"
+    href="/api/recipients/list"
+  >
+    Get list of all recipients
+  </Card>
+</CardGroup>

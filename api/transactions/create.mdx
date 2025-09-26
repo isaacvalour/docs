@@ -1,0 +1,689 @@
+---
+title: "Create Transaction"
+api: "POST /v1/transactions"
+description: "Create a new transaction for transferring funds"
+---
+
+## Overview
+
+Create a new transaction to transfer funds between accounts. This endpoint initiates a transaction that will need payment confirmation before processing.
+
+<Note>
+Transactions created through this endpoint are initially in `pending` status and require payment confirmation before they can be processed. Use the transfer requests endpoint for a more streamlined flow.
+</Note>
+
+## Request Body
+
+<ParamField body="amount" type="string" required>
+  The amount to transfer
+  
+  **Format:** Decimal string (e.g., `"1000.00"`)
+  **Validation:** Must be positive and within account limits
+</ParamField>
+
+<ParamField body="currency" type="string" required>
+  The source currency code
+  
+  **Format:** 3-letter ISO currency code (e.g., `"NGN"`, `"USD"`)
+  **Validation:** Must be supported currency
+</ParamField>
+
+<ParamField body="recipient_id" type="string" required>
+  The ID of the recipient for this transaction
+  
+  **Format:** UUID of existing recipient
+  **Validation:** Must be valid recipient ID
+</ParamField>
+
+<ParamField body="rate" type="string">
+  The exchange rate to use for this transaction
+  
+  **Format:** Decimal string (e.g., `"1.2345"`)
+  **Note:** If not provided, current market rate will be used
+</ParamField>
+
+<ParamField body="pair" type="string">
+  The currency pair for this transaction
+  
+  **Format:** `"FROM_CURRENCY/TO_CURRENCY"` (e.g., `"NGN/USDC"`)
+  **Note:** If not provided, will be determined from currency and recipient
+</ParamField>
+
+<ParamField body="fee" type="string">
+  The transaction fee
+  
+  **Format:** Decimal string (e.g., `"10.00"`)
+  **Note:** If not provided, will be calculated automatically
+</ParamField>
+
+<ParamField body="reference" type="string">
+  Custom reference for this transaction
+  
+  **Format:** Alphanumeric string (e.g., `"TXN-1234567890"`)
+  **Note:** If not provided, will be generated automatically
+</ParamField>
+
+<ParamField body="description" type="string">
+  Description or memo for this transaction
+  
+  **Format:** String up to 255 characters
+  **Note:** Optional field for additional context
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Additional metadata for this transaction
+  
+  **Format:** JSON object with custom fields
+  **Note:** Useful for storing application-specific data
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique internal identifier for the transaction
+</ResponseField>
+
+<ResponseField name="reference" type="string">
+  Unique reference ID for the transaction
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current transaction status (`pending`)
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Transaction type (`transfer`)
+</ResponseField>
+
+<ResponseField name="amount" type="string">
+  Transaction amount
+</ResponseField>
+
+<ResponseField name="fee" type="string">
+  Transaction fee
+</ResponseField>
+
+<ResponseField name="sender_currency" type="string">
+  Source currency code
+</ResponseField>
+
+<ResponseField name="receiver_currency" type="string">
+  Destination currency code
+</ResponseField>
+
+<ResponseField name="rate" type="string">
+  Exchange rate used for the transaction
+</ResponseField>
+
+<ResponseField name="source_amount" type="string">
+  Amount to be sent from source
+</ResponseField>
+
+<ResponseField name="received_amount" type="string">
+  Amount to be received by destination
+</ResponseField>
+
+<ResponseField name="transfer_fee" type="string">
+  Transfer fee amount
+</ResponseField>
+
+<ResponseField name="recipient_name" type="string">
+  Name of the recipient
+</ResponseField>
+
+<ResponseField name="wallet_address" type="string">
+  Destination wallet address
+</ResponseField>
+
+<ResponseField name="network" type="string">
+  Blockchain network to be used
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Transaction creation timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="payment_instructions" type="object">
+  Instructions for completing the payment
+</ResponseField>
+
+<ResponseField name="payment_instructions.amount" type="string">
+  Amount to be paid
+</ResponseField>
+
+<ResponseField name="payment_instructions.currency" type="string">
+  Currency for payment
+</ResponseField>
+
+<ResponseField name="payment_instructions.reference" type="string">
+  Reference to include with payment
+</ResponseField>
+
+<ResponseField name="payment_instructions.account_details" type="object">
+  Account details for payment
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.railsfromthecrypt.com/v1/transactions" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "1000.00",
+    "currency": "NGN",
+    "recipient_id": "123e4567-e89b-12d3-a456-426614174000",
+    "rate": "1.2345",
+    "pair": "NGN/USDC",
+    "fee": "10.00",
+    "description": "Payment for services"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    amount: '1000.00',
+    currency: 'NGN',
+    recipient_id: '123e4567-e89b-12d3-a456-426614174000',
+    rate: '1.2345',
+    pair: 'NGN/USDC',
+    fee: '10.00',
+    description: 'Payment for services'
+  })
+});
+
+const transaction = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/transactions',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'amount': '1000.00',
+        'currency': 'NGN',
+        'recipient_id': '123e4567-e89b-12d3-a456-426614174000',
+        'rate': '1.2345',
+        'pair': 'NGN/USDC',
+        'fee': '10.00',
+        'description': 'Payment for services'
+    }
+)
+transaction = response.json()
+```
+
+```php PHP
+<?php
+
+$response = $httpClient->post('https://api.railsfromthecrypt.com/v1/transactions', [
+    'headers' => [
+        'Authorization' => 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type' => 'application/json'
+    ],
+    'json' => [
+        'amount' => '1000.00',
+        'currency' => 'NGN',
+        'recipient_id' => '123e4567-e89b-12d3-a456-426614174000',
+        'rate' => '1.2345',
+        'pair' => 'NGN/USDC',
+        'fee' => '10.00',
+        'description' => 'Payment for services'
+    ]
+]);
+$transaction = $response->json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "reference": "TXN-1234567890",
+  "status": "pending",
+  "type": "transfer",
+  "amount": "1000.00",
+  "fee": "10.00",
+  "sender_currency": "NGN",
+  "receiver_currency": "USDC",
+  "rate": "1.2345",
+  "source_amount": "1000.00",
+  "received_amount": "990.00",
+  "transfer_fee": "10.00",
+  "recipient_name": "John Doe",
+  "wallet_address": "0x1234567890abcdef1234567890abcdef12345678",
+  "network": "Polygon",
+  "created_at": "2024-01-01T12:00:00Z",
+  "payment_instructions": {
+    "amount": "1000.00",
+    "currency": "NGN",
+    "reference": "TXN-1234567890",
+    "account_details": {
+      "bank_name": "First Bank of Nigeria",
+      "account_number": "1234567890",
+      "account_name": "HashRails Limited",
+      "routing_code": "011"
+    }
+  }
+}
+```
+
+</ResponseExample>
+
+## Error Responses
+
+<ResponseField name="message" type="string">
+  Error description
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  Error details
+</ResponseField>
+
+### Common Error Codes
+
+<CardGroup cols={2}>
+  <Card title="400 Bad Request" icon="exclamation-triangle">
+    - **INVALID_AMOUNT**: Invalid amount format or value
+    - **INVALID_CURRENCY**: Unsupported currency code
+    - **INVALID_RECIPIENT**: Recipient ID not found
+    - **INVALID_RATE**: Invalid exchange rate
+    - **INSUFFICIENT_FUNDS**: Insufficient account balance
+  </Card>
+  <Card title="401 Unauthorized" icon="shield-exclamation">
+    - **INVALID_TOKEN**: Invalid or expired access token
+    - **MISSING_TOKEN**: Authorization header missing
+  </Card>
+  <Card title="403 Forbidden" icon="lock">
+    - **ACCOUNT_LIMIT_EXCEEDED**: Transaction exceeds account limits
+    - **RECIPIENT_BLOCKED**: Recipient is blocked or restricted
+    - **CURRENCY_NOT_SUPPORTED**: Currency not supported for user
+  </Card>
+  <Card title="422 Unprocessable Entity" icon="exclamation">
+    - **VALIDATION_ERROR**: Request validation failed
+    - **RATE_EXPIRED**: Exchange rate has expired
+    - **DUPLICATE_REFERENCE**: Reference ID already exists
+  </Card>
+</CardGroup>
+
+## Usage Examples
+
+### Basic Transaction Creation
+
+<CodeGroup>
+
+```javascript JavaScript
+async function createTransaction(transactionData) {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(transactionData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create transaction');
+    }
+
+    const transaction = await response.json();
+    console.log('Transaction created:', transaction);
+    
+    return transaction;
+  } catch (error) {
+    console.error('Error creating transaction:', error);
+    throw error;
+  }
+}
+
+// Usage
+const transactionData = {
+  amount: '1000.00',
+  currency: 'NGN',
+  recipient_id: '123e4567-e89b-12d3-a456-426614174000',
+  description: 'Payment for services'
+};
+
+const transaction = await createTransaction(transactionData);
+```
+
+```python Python
+def create_transaction(transaction_data):
+    try:
+        response = requests.post(
+            'https://api.railsfromthecrypt.com/v1/transactions',
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Content-Type': 'application/json'
+            },
+            json=transaction_data
+        )
+        
+        if not response.ok:
+            error = response.json()
+            raise Exception(error.get('message', 'Failed to create transaction'))
+        
+        transaction = response.json()
+        print('Transaction created:', transaction)
+        
+        return transaction
+        
+    except Exception as e:
+        print(f'Error creating transaction: {e}')
+        raise
+
+# Usage
+transaction_data = {
+    'amount': '1000.00',
+    'currency': 'NGN',
+    'recipient_id': '123e4567-e89b-12d3-a456-426614174000',
+    'description': 'Payment for services'
+}
+
+transaction = create_transaction(transaction_data)
+```
+
+</CodeGroup>
+
+### Transaction with Custom Reference
+
+<CodeGroup>
+
+```javascript JavaScript
+async function createTransactionWithReference(transactionData, customReference) {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ...transactionData,
+        reference: customReference
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create transaction');
+    }
+
+    const transaction = await response.json();
+    console.log('Transaction created with custom reference:', transaction);
+    
+    return transaction;
+  } catch (error) {
+    console.error('Error creating transaction with reference:', error);
+    throw error;
+  }
+}
+
+// Usage
+const transactionData = {
+  amount: '1000.00',
+  currency: 'NGN',
+  recipient_id: '123e4567-e89b-12d3-a456-426614174000'
+};
+
+const customReference = `TXN-${Date.now()}`;
+const transaction = await createTransactionWithReference(transactionData, customReference);
+```
+
+</CodeGroup>
+
+### Transaction with Metadata
+
+<CodeGroup>
+
+```javascript JavaScript
+async function createTransactionWithMetadata(transactionData, metadata) {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ...transactionData,
+        metadata: metadata
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create transaction');
+    }
+
+    const transaction = await response.json();
+    console.log('Transaction created with metadata:', transaction);
+    
+    return transaction;
+  } catch (error) {
+    console.error('Error creating transaction with metadata:', error);
+    throw error;
+  }
+}
+
+// Usage
+const transactionData = {
+  amount: '1000.00',
+  currency: 'NGN',
+  recipient_id: '123e4567-e89b-12d3-a456-426614174000'
+};
+
+const metadata = {
+  source: 'mobile_app',
+  version: '1.2.3',
+  device_id: 'device_123',
+  order_id: 'ORDER-123456'
+};
+
+const transaction = await createTransactionWithMetadata(transactionData, metadata);
+```
+
+</CodeGroup>
+
+### Complete Transaction Flow
+
+<CodeGroup>
+
+```javascript JavaScript
+class TransactionManager {
+  constructor(apiClient) {
+    this.apiClient = apiClient;
+  }
+  
+  async createAndProcessTransaction(transactionData) {
+    try {
+      // Step 1: Create transaction
+      const transaction = await this.createTransaction(transactionData);
+      
+      // Step 2: Display payment instructions
+      this.displayPaymentInstructions(transaction);
+      
+      // Step 3: Start monitoring for payment confirmation
+      this.monitorTransaction(transaction.id);
+      
+      return transaction;
+    } catch (error) {
+      console.error('Failed to create and process transaction:', error);
+      throw error;
+    }
+  }
+  
+  async createTransaction(transactionData) {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(transactionData)
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create transaction');
+    }
+    
+    return await response.json();
+  }
+  
+  displayPaymentInstructions(transaction) {
+    const instructions = transaction.payment_instructions;
+    
+    console.log('Payment Instructions:');
+    console.log(`Amount: ${instructions.amount} ${instructions.currency}`);
+    console.log(`Reference: ${instructions.reference}`);
+    console.log(`Account: ${instructions.account_details.account_name}`);
+    console.log(`Account Number: ${instructions.account_details.account_number}`);
+    console.log(`Bank: ${instructions.account_details.bank_name}`);
+  }
+  
+  async monitorTransaction(transactionId) {
+    // Implementation for monitoring transaction status
+    // This would typically involve polling or webhook handling
+    console.log(`Monitoring transaction: ${transactionId}`);
+  }
+}
+```
+
+</CodeGroup>
+
+### Error Handling
+
+<CodeGroup>
+
+```javascript JavaScript
+async function createTransactionWithErrorHandling(transactionData) {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(transactionData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      
+      switch (response.status) {
+        case 400:
+          throw new Error(`Bad Request: ${error.message}`);
+        case 401:
+          throw new Error('Unauthorized: Please check your access token');
+        case 403:
+          throw new Error(`Forbidden: ${error.message}`);
+        case 422:
+          throw new Error(`Validation Error: ${error.message}`);
+        default:
+          throw new Error(`Server Error: ${error.message}`);
+      }
+    }
+
+    const transaction = await response.json();
+    return transaction;
+    
+  } catch (error) {
+    console.error('Error creating transaction:', error);
+    
+    // Handle specific error cases
+    if (error.message.includes('INSUFFICIENT_FUNDS')) {
+      console.log('Please add funds to your account');
+    } else if (error.message.includes('INVALID_RECIPIENT')) {
+      console.log('Please check the recipient ID');
+    } else if (error.message.includes('RATE_EXPIRED')) {
+      console.log('Exchange rate expired, please try again');
+    }
+    
+    throw error;
+  }
+}
+```
+
+</CodeGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Transaction Creation">
+    - Validate all input data before sending
+    - Use appropriate error handling for different scenarios
+    - Store transaction IDs for tracking purposes
+    - Implement retry logic for transient failures
+  </Accordion>
+  <Accordion title="Payment Instructions">
+    - Display payment instructions clearly to users
+    - Include reference number in payment
+    - Provide multiple payment methods when possible
+    - Set clear payment deadlines
+  </Accordion>
+  <Accordion title="Error Handling">
+    - Handle validation errors gracefully
+    - Provide clear error messages to users
+    - Implement proper logging for debugging
+    - Use appropriate HTTP status codes
+  </Accordion>
+  <Accordion title="Security">
+    - Validate recipient IDs before creating transactions
+    - Implement proper authorization checks
+    - Use secure communication (HTTPS)
+    - Log all transaction creation attempts
+  </Accordion>
+</AccordionGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Transaction by ID"
+    icon="id-card"
+    href="/api/transactions/get-by-id"
+  >
+    Get a specific transaction by internal ID
+  </Card>
+  <Card
+    title="Get Transaction by Reference"
+    icon="search"
+    href="/api/transactions/get-by-reference"
+  >
+    Get a specific transaction by reference ID
+  </Card>
+  <Card
+    title="List Transactions"
+    icon="list"
+    href="/api/transactions/list"
+  >
+    Get paginated list of all transactions
+  </Card>
+  <Card
+    title="Create Transfer Request"
+    icon="plus"
+    href="/api/transfer-requests/create"
+  >
+    Create a new transfer request (recommended)
+  </Card>
+</CardGroup>

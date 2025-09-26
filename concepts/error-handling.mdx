@@ -1,0 +1,998 @@
+---
+title: "Error Handling"
+description: "Understanding error responses and status codes in HR API"
+---
+
+## Overview
+
+HR API uses standard HTTP status codes and provides detailed error information to help you handle errors gracefully in your application. This guide covers all error types, status codes, and best practices for error handling.
+
+## HTTP Status Codes
+
+### Success Codes (2xx)
+
+<CardGroup cols={2}>
+  <Card title="200 OK" icon="check-circle">
+    Request successful. Data returned in response body.
+  </Card>
+  <Card title="201 Created" icon="plus-circle">
+    Resource created successfully. New resource data returned.
+  </Card>
+  <Card title="204 No Content" icon="minus-circle">
+    Request successful, no content returned (e.g., delete operations).
+  </Card>
+</CardGroup>
+
+### Client Error Codes (4xx)
+
+<CardGroup cols={2}>
+  <Card title="400 Bad Request" icon="exclamation-triangle">
+    Invalid request parameters or malformed request body.
+  </Card>
+  <Card title="401 Unauthorized" icon="shield-exclamation">
+    Invalid or missing authentication token.
+  </Card>
+  <Card title="402 Payment Required" icon="credit-card">
+    Two-factor authentication required.
+  </Card>
+  <Card title="403 Forbidden" icon="lock">
+    Insufficient permissions or account restrictions.
+  </Card>
+  <Card title="404 Not Found" icon="search">
+    Resource not found or endpoint doesn't exist.
+  </Card>
+  <Card title="409 Conflict" icon="exclamation">
+    Resource already exists or conflict with current state.
+  </Card>
+  <Card title="422 Unprocessable Entity" icon="file-exclamation">
+    Validation errors in request data.
+  </Card>
+  <Card title="429 Too Many Requests" icon="clock">
+    Rate limit exceeded. Wait before retrying.
+  </Card>
+</CardGroup>
+
+### Server Error Codes (5xx)
+
+<CardGroup cols={2}>
+  <Card title="500 Internal Server Error" icon="server">
+    Unexpected server error occurred.
+  </Card>
+  <Card title="502 Bad Gateway" icon="network-wired">
+    Upstream service error or timeout.
+  </Card>
+  <Card title="503 Service Unavailable" icon="wrench">
+    Service temporarily unavailable for maintenance.
+  </Card>
+</CardGroup>
+
+## Error Response Format
+
+All error responses follow a consistent JSON format:
+
+```json
+{
+  "success": false,
+  "message": "Human-readable error description",
+  "error": {
+    "code": "ERROR_CODE",
+    "type": "error_type",
+    "details": "Additional error details",
+    "field": "field_name",
+    "value": "invalid_value"
+  },
+  "timestamp": "2024-01-01T12:00:00Z",
+  "request_id": "req_1234567890"
+}
+```
+
+## Common Error Types
+
+### Authentication Errors
+
+<AccordionGroup>
+  <Accordion title="Invalid Credentials">
+    ```json
+    {
+      "success": false,
+      "message": "Invalid email or password",
+      "error": {
+        "code": "INVALID_CREDENTIALS",
+        "type": "authentication_error"
+      }
+    }
+    ```
+    **Status Code**: 401
+    **Solution**: Verify email and password are correct
+  </Accordion>
+  <Accordion title="Token Expired">
+    ```json
+    {
+      "success": false,
+      "message": "Access token has expired",
+      "error": {
+        "code": "TOKEN_EXPIRED",
+        "type": "authentication_error"
+      }
+    }
+    ```
+    **Status Code**: 401
+    **Solution**: Use refresh token to get new access token
+  </Accordion>
+  <Accordion title="Invalid Token">
+    ```json
+    {
+      "success": false,
+      "message": "Invalid or malformed access token",
+      "error": {
+        "code": "INVALID_TOKEN",
+        "type": "authentication_error"
+      }
+    }
+    ```
+    **Status Code**: 401
+    **Solution**: Re-authenticate to get a new token
+  </Accordion>
+  <Accordion title="2FA Required">
+    ```json
+    {
+      "success": false,
+      "message": "Two-factor authentication required",
+      "error": {
+        "code": "2FA_REQUIRED",
+        "type": "authentication_error"
+      }
+    }
+    ```
+    **Status Code**: 402
+    **Solution**: Provide 2FA code using the verify endpoint
+  </Accordion>
+</AccordionGroup>
+
+### Validation Errors
+
+<AccordionGroup>
+  <Accordion title="Missing Required Fields">
+    ```json
+    {
+      "success": false,
+      "message": "Validation failed",
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "type": "validation_error",
+        "details": "Missing required field: email",
+        "field": "email"
+      }
+    }
+    ```
+    **Status Code**: 400
+    **Solution**: Include all required fields in request
+  </Accordion>
+  <Accordion title="Invalid Field Format">
+    ```json
+    {
+      "success": false,
+      "message": "Validation failed",
+      "error": {
+        "code": "INVALID_FORMAT",
+        "type": "validation_error",
+        "details": "Invalid email format",
+        "field": "email",
+        "value": "invalid-email"
+      }
+    }
+    ```
+    **Status Code**: 400
+    **Solution**: Ensure field values match expected format
+  </Accordion>
+  <Accordion title="Field Too Long">
+    ```json
+    {
+      "success": false,
+      "message": "Validation failed",
+      "error": {
+        "code": "FIELD_TOO_LONG",
+        "type": "validation_error",
+        "details": "Field exceeds maximum length of 255 characters",
+        "field": "company_name",
+        "value": "Very long company name..."
+      }
+    }
+    ```
+    **Status Code**: 400
+    **Solution**: Reduce field length to within limits
+  </Accordion>
+</AccordionGroup>
+
+### Permission Errors
+
+<AccordionGroup>
+  <Accordion title="Insufficient Permissions">
+    ```json
+    {
+      "success": false,
+      "message": "Insufficient permissions for this operation",
+      "error": {
+        "code": "INSUFFICIENT_PERMISSIONS",
+        "type": "permission_error"
+      }
+    }
+    ```
+    **Status Code**: 403
+    **Solution**: Contact support to upgrade account permissions
+  </Accordion>
+  <Accordion title="Account Restricted">
+    ```json
+    {
+      "success": false,
+      "message": "Account access is restricted",
+      "error": {
+        "code": "ACCOUNT_RESTRICTED",
+        "type": "permission_error"
+      }
+    }
+    ```
+    **Status Code**: 403
+    **Solution**: Contact support to resolve account restrictions
+  </Accordion>
+  <Accordion title="IP Not Whitelisted">
+    ```json
+    {
+      "success": false,
+      "message": "IP address not whitelisted",
+      "error": {
+        "code": "IP_NOT_WHITELISTED",
+        "type": "permission_error"
+      }
+    }
+    ```
+    **Status Code**: 403
+    **Solution**: Add your IP address to the whitelist
+  </Accordion>
+</AccordionGroup>
+
+### Resource Errors
+
+<AccordionGroup>
+  <Accordion title="Resource Not Found">
+    ```json
+    {
+      "success": false,
+      "message": "Resource not found",
+      "error": {
+        "code": "RESOURCE_NOT_FOUND",
+        "type": "resource_error"
+      }
+    }
+    ```
+    **Status Code**: 404
+    **Solution**: Verify resource ID exists and is accessible
+  </Accordion>
+  <Accordion title="Resource Already Exists">
+    ```json
+    {
+      "success": false,
+      "message": "Resource already exists",
+      "error": {
+        "code": "RESOURCE_EXISTS",
+        "type": "resource_error"
+      }
+    }
+    ```
+    **Status Code**: 409
+    **Solution**: Use existing resource or provide unique identifier
+  </Accordion>
+  <Accordion title="Resource Conflict">
+    ```json
+    {
+      "success": false,
+      "message": "Resource state conflict",
+      "error": {
+        "code": "RESOURCE_CONFLICT",
+        "type": "resource_error"
+      }
+    }
+    ```
+    **Status Code**: 409
+    **Solution**: Check resource state and retry operation
+  </Accordion>
+</AccordionGroup>
+
+### Rate Limiting Errors
+
+<AccordionGroup>
+  <Accordion title="Rate Limit Exceeded">
+    ```json
+    {
+      "success": false,
+      "message": "Rate limit exceeded",
+      "error": {
+        "code": "RATE_LIMIT_EXCEEDED",
+        "type": "rate_limit_error",
+        "details": "1000 requests per hour limit exceeded"
+      }
+    }
+    ```
+    **Status Code**: 429
+    **Solution**: Wait for rate limit reset or implement backoff
+  </Accordion>
+</AccordionGroup>
+
+### Server Errors
+
+<AccordionGroup>
+  <Accordion title="Internal Server Error">
+    ```json
+    {
+      "success": false,
+      "message": "Internal server error",
+      "error": {
+        "code": "INTERNAL_ERROR",
+        "type": "server_error"
+      }
+    }
+    ```
+    **Status Code**: 500
+    **Solution**: Retry request or contact support if persistent
+  </Accordion>
+  <Accordion title="Service Unavailable">
+    ```json
+    {
+      "success": false,
+      "message": "Service temporarily unavailable",
+      "error": {
+        "code": "SERVICE_UNAVAILABLE",
+        "type": "server_error"
+      }
+    }
+    ```
+    **Status Code**: 503
+    **Solution**: Wait and retry, check status page for updates
+  </Accordion>
+  <Accordion title="Gateway Timeout">
+    ```json
+    {
+      "success": false,
+      "message": "Gateway timeout",
+      "error": {
+        "code": "GATEWAY_TIMEOUT",
+        "type": "server_error"
+      }
+    }
+    ```
+    **Status Code**: 502
+    **Solution**: Retry request with exponential backoff
+  </Accordion>
+</AccordionGroup>
+
+## Error Handling Best Practices
+
+### Client-Side Error Handling
+
+<CodeGroup>
+
+```javascript JavaScript
+class HRAPIClient {
+  async makeRequest(endpoint, options = {}) {
+    try {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        ...options,
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new HRAPIError(data, response.status);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof HRAPIError) {
+        throw error;
+      }
+      
+      // Network or other errors
+      throw new HRAPIError({
+        success: false,
+        message: 'Network error',
+        error: {
+          code: 'NETWORK_ERROR',
+          type: 'network_error'
+        }
+      }, 0);
+    }
+  }
+
+  async handleError(error) {
+    if (error.status === 401) {
+      // Token expired, try to refresh
+      try {
+        await this.refreshAccessToken();
+        // Retry the original request
+        return this.retryRequest();
+      } catch (refreshError) {
+        // Refresh failed, redirect to login
+        this.redirectToLogin();
+      }
+    } else if (error.status === 429) {
+      // Rate limited, implement backoff
+      const retryAfter = error.response.headers.get('Retry-After');
+      await this.delay(retryAfter * 1000);
+      return this.retryRequest();
+    } else if (error.status >= 500) {
+      // Server error, retry with exponential backoff
+      await this.exponentialBackoff();
+      return this.retryRequest();
+    } else {
+      // Client error, don't retry
+      this.logError(error);
+      throw error;
+    }
+  }
+}
+
+class HRAPIError extends Error {
+  constructor(data, status) {
+    super(data.message);
+    this.name = 'HRAPIError';
+    this.data = data;
+    this.status = status;
+    this.code = data.error?.code;
+    this.type = data.error?.type;
+  }
+}
+```
+
+```python Python
+import requests
+import time
+import random
+from typing import Optional, Dict, Any
+
+class HRAPIError(Exception):
+    def __init__(self, data: Dict[str, Any], status_code: int):
+        self.data = data
+        self.status_code = status_code
+        self.code = data.get('error', {}).get('code')
+        self.type = data.get('error', {}).get('type')
+        super().__init__(data.get('message', 'Unknown error'))
+
+class HRAPIClient:
+    def __init__(self, base_url: str, access_token: str):
+        self.base_url = base_url
+        self.access_token = access_token
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        })
+
+    def make_request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+        url = f"{self.base_url}{endpoint}"
+        
+        try:
+            response = self.session.request(method, url, **kwargs)
+            data = response.json()
+            
+            if not response.ok:
+                raise HRAPIError(data, response.status_code)
+            
+            return data
+            
+        except requests.exceptions.RequestException as e:
+            raise HRAPIError({
+                'success': False,
+                'message': 'Network error',
+                'error': {
+                    'code': 'NETWORK_ERROR',
+                    'type': 'network_error'
+                }
+            }, 0)
+
+    def handle_error(self, error: HRAPIError) -> Optional[Dict[str, Any]]:
+        if error.status_code == 401:
+            # Token expired, try to refresh
+            try:
+                self.refresh_access_token()
+                return self.retry_request()
+            except Exception:
+                # Refresh failed, redirect to login
+                self.redirect_to_login()
+                
+        elif error.status_code == 429:
+            # Rate limited, implement backoff
+            retry_after = int(error.data.get('retry_after', 60))
+            time.sleep(retry_after)
+            return self.retry_request()
+            
+        elif error.status_code >= 500:
+            # Server error, retry with exponential backoff
+            self.exponential_backoff()
+            return self.retry_request()
+            
+        else:
+            # Client error, don't retry
+            self.log_error(error)
+            raise error
+
+    def exponential_backoff(self, max_retries: int = 3):
+        for attempt in range(max_retries):
+            delay = (2 ** attempt) + random.uniform(0, 1)
+            time.sleep(delay)
+```
+
+```php PHP
+<?php
+
+class HRAPIError extends Exception
+{
+    public $data;
+    public $statusCode;
+    public $code;
+    public $type;
+
+    public function __construct($data, $statusCode)
+    {
+        $this->data = $data;
+        $this->statusCode = $statusCode;
+        $this->code = $data['error']['code'] ?? null;
+        $this->type = $data['error']['type'] ?? null;
+        
+        parent::__construct($data['message'] ?? 'Unknown error');
+    }
+}
+
+class HRAPIClient
+{
+    private $baseUrl;
+    private $accessToken;
+    private $httpClient;
+
+    public function __construct($baseUrl, $accessToken)
+    {
+        $this->baseUrl = $baseUrl;
+        $this->accessToken = $accessToken;
+        $this->httpClient = new GuzzleHttp\Client([
+            'headers' => [
+                'Authorization' => "Bearer {$accessToken}",
+                'Content-Type' => 'application/json'
+            ]
+        ]);
+    }
+
+    public function makeRequest($method, $endpoint, $options = [])
+    {
+        try {
+            $response = $this->httpClient->request($method, $this->baseUrl . $endpoint, $options);
+            $data = json_decode($response->getBody(), true);
+            
+            return $data;
+            
+        } catch (GuzzleHttp\Exception\ClientException $e) {
+            $response = $e->getResponse();
+            $data = json_decode($response->getBody(), true);
+            throw new HRAPIError($data, $response->getStatusCode());
+            
+        } catch (GuzzleHttp\Exception\ServerException $e) {
+            $response = $e->getResponse();
+            $data = json_decode($response->getBody(), true);
+            throw new HRAPIError($data, $response->getStatusCode());
+            
+        } catch (Exception $e) {
+            throw new HRAPIError([
+                'success' => false,
+                'message' => 'Network error',
+                'error' => [
+                    'code' => 'NETWORK_ERROR',
+                    'type' => 'network_error'
+                ]
+            ], 0);
+        }
+    }
+
+    public function handleError(HRAPIError $error)
+    {
+        switch ($error->statusCode) {
+            case 401:
+                // Token expired, try to refresh
+                try {
+                    $this->refreshAccessToken();
+                    return $this->retryRequest();
+                } catch (Exception $e) {
+                    // Refresh failed, redirect to login
+                    $this->redirectToLogin();
+                }
+                break;
+                
+            case 429:
+                // Rate limited, implement backoff
+                $retryAfter = $error->data['retry_after'] ?? 60;
+                sleep($retryAfter);
+                return $this->retryRequest();
+                
+            case 500:
+            case 502:
+            case 503:
+                // Server error, retry with exponential backoff
+                $this->exponentialBackoff();
+                return $this->retryRequest();
+                
+            default:
+                // Client error, don't retry
+                $this->logError($error);
+                throw $error;
+        }
+    }
+
+    private function exponentialBackoff($maxRetries = 3)
+    {
+        for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+            $delay = pow(2, $attempt) + mt_rand(0, 1000) / 1000;
+            usleep($delay * 1000000);
+        }
+    }
+}
+```
+
+</CodeGroup>
+
+### Retry Strategies
+
+<AccordionGroup>
+  <Accordion title="Exponential Backoff">
+    Implement exponential backoff for retryable errors:
+    ```javascript
+    async function exponentialBackoff(attempt, maxRetries = 3) {
+      if (attempt >= maxRetries) {
+        throw new Error('Max retries exceeded');
+      }
+      
+      const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    ```
+  </Accordion>
+  <Accordion title="Circuit Breaker">
+    Implement circuit breaker pattern for failing services:
+    ```javascript
+    class CircuitBreaker {
+      constructor(threshold = 5, timeout = 60000) {
+        this.failureCount = 0;
+        this.threshold = threshold;
+        this.timeout = timeout;
+        this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
+        this.nextAttempt = Date.now();
+      }
+      
+      async execute(fn) {
+        if (this.state === 'OPEN') {
+          if (Date.now() < this.nextAttempt) {
+            throw new Error('Circuit breaker is OPEN');
+          }
+          this.state = 'HALF_OPEN';
+        }
+        
+        try {
+          const result = await fn();
+          this.onSuccess();
+          return result;
+        } catch (error) {
+          this.onFailure();
+          throw error;
+        }
+      }
+      
+      onSuccess() {
+        this.failureCount = 0;
+        this.state = 'CLOSED';
+      }
+      
+      onFailure() {
+        this.failureCount++;
+        if (this.failureCount >= this.threshold) {
+          this.state = 'OPEN';
+          this.nextAttempt = Date.now() + this.timeout;
+        }
+      }
+    }
+    ```
+  </Accordion>
+  <Accordion title="Rate Limit Handling">
+    Handle rate limits with proper backoff:
+    ```javascript
+    async function handleRateLimit(response) {
+      const retryAfter = response.headers.get('Retry-After');
+      const delay = retryAfter ? parseInt(retryAfter) * 1000 : 60000;
+      
+      console.log(`Rate limited. Retrying after ${delay}ms`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Error Monitoring
+
+### Logging Errors
+
+<CodeGroup>
+
+```javascript JavaScript
+function logError(error, context = {}) {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    error: {
+      message: error.message,
+      code: error.code,
+      type: error.type,
+      status: error.status
+    },
+    context: context,
+    stack: error.stack
+  };
+  
+  // Send to logging service
+  console.error('HR API Error:', logEntry);
+  
+  // Send to monitoring service (e.g., Sentry, LogRocket)
+  if (window.Sentry) {
+    window.Sentry.captureException(error, {
+      tags: {
+        service: 'hr-api',
+        error_code: error.code
+      },
+      extra: context
+    });
+  }
+}
+```
+
+```python Python
+import logging
+import json
+from datetime import datetime
+
+def log_error(error, context=None):
+    log_entry = {
+        'timestamp': datetime.utcnow().isoformat(),
+        'error': {
+            'message': str(error),
+            'code': getattr(error, 'code', None),
+            'type': getattr(error, 'type', None),
+            'status': getattr(error, 'status_code', None)
+        },
+        'context': context or {},
+        'stack': str(error.__traceback__) if hasattr(error, '__traceback__') else None
+    }
+    
+    # Log to file
+    logging.error(f"HR API Error: {json.dumps(log_entry)}")
+    
+    # Send to monitoring service
+    try:
+        import sentry_sdk
+        sentry_sdk.capture_exception(error, extra=context)
+    except ImportError:
+        pass
+```
+
+</CodeGroup>
+
+### Error Metrics
+
+Track error metrics for monitoring and alerting:
+
+<CodeGroup>
+
+```javascript JavaScript
+class ErrorMetrics {
+  constructor() {
+    this.errors = new Map();
+    this.startTime = Date.now();
+  }
+  
+  recordError(error) {
+    const key = `${error.code}_${error.status}`;
+    const count = this.errors.get(key) || 0;
+    this.errors.set(key, count + 1);
+    
+    // Send to metrics service
+    this.sendMetrics({
+      error_code: error.code,
+      status_code: error.status,
+      count: count + 1,
+      timestamp: Date.now()
+    });
+  }
+  
+  getErrorRate() {
+    const totalErrors = Array.from(this.errors.values()).reduce((a, b) => a + b, 0);
+    const timeElapsed = (Date.now() - this.startTime) / 1000 / 60; // minutes
+    return totalErrors / timeElapsed;
+  }
+}
+```
+
+</CodeGroup>
+
+## Testing Error Handling
+
+### Unit Tests
+
+<CodeGroup>
+
+```javascript JavaScript
+describe('Error Handling', () => {
+  test('should handle 401 errors by refreshing token', async () => {
+    const client = new HRAPIClient('https://api.test.com', 'token');
+    
+    // Mock expired token response
+    fetch.mockResponseOnce(JSON.stringify({
+      success: false,
+      message: 'Token expired',
+      error: { code: 'TOKEN_EXPIRED' }
+    }), { status: 401 });
+    
+    // Mock successful refresh
+    fetch.mockResponseOnce(JSON.stringify({
+      access_token: 'new_token',
+      refresh_token: 'new_refresh_token'
+    }));
+    
+    // Mock successful retry
+    fetch.mockResponseOnce(JSON.stringify({
+      success: true,
+      data: { id: '123' }
+    }));
+    
+    const result = await client.makeRequest('/test');
+    expect(result.success).toBe(true);
+  });
+  
+  test('should handle rate limiting with backoff', async () => {
+    const client = new HRAPIClient('https://api.test.com', 'token');
+    
+    // Mock rate limit response
+    fetch.mockResponseOnce(JSON.stringify({
+      success: false,
+      message: 'Rate limit exceeded',
+      error: { code: 'RATE_LIMIT_EXCEEDED' }
+    }), { 
+      status: 429,
+      headers: { 'Retry-After': '60' }
+    });
+    
+    // Mock successful retry
+    fetch.mockResponseOnce(JSON.stringify({
+      success: true,
+      data: { id: '123' }
+    }));
+    
+    const result = await client.makeRequest('/test');
+    expect(result.success).toBe(true);
+  });
+});
+```
+
+</CodeGroup>
+
+## Common Error Scenarios
+
+<AccordionGroup>
+  <Accordion title="Network Timeouts">
+    **Problem**: Requests timing out due to network issues
+    **Solution**: Implement proper timeout handling and retry logic
+    ```javascript
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        // ... other options
+      });
+      clearTimeout(timeoutId);
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        // Handle timeout
+      }
+    }
+    ```
+  </Accordion>
+  <Accordion title="Concurrent Requests">
+    **Problem**: Multiple requests causing rate limiting
+    **Solution**: Implement request queuing and throttling
+    ```javascript
+    class RequestQueue {
+      constructor(maxConcurrent = 5) {
+        this.queue = [];
+        this.running = 0;
+        this.maxConcurrent = maxConcurrent;
+      }
+      
+      async add(request) {
+        return new Promise((resolve, reject) => {
+          this.queue.push({ request, resolve, reject });
+          this.process();
+        });
+      }
+      
+      async process() {
+        if (this.running >= this.maxConcurrent || this.queue.length === 0) {
+          return;
+        }
+        
+        this.running++;
+        const { request, resolve, reject } = this.queue.shift();
+        
+        try {
+          const result = await request();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        } finally {
+          this.running--;
+          this.process();
+        }
+      }
+    }
+    ```
+  </Accordion>
+  <Accordion title="Partial Failures">
+    **Problem**: Some operations succeed while others fail
+    **Solution**: Implement batch processing with individual error handling
+    ```javascript
+    async function processBatch(requests) {
+      const results = await Promise.allSettled(requests);
+      
+      const successful = results
+        .filter(result => result.status === 'fulfilled')
+        .map(result => result.value);
+        
+      const failed = results
+        .filter(result => result.status === 'rejected')
+        .map(result => result.reason);
+        
+      return { successful, failed };
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Error Recovery Strategies
+
+<CardGroup cols={2}>
+  <Card title="Automatic Retry" icon="refresh">
+    - Implement exponential backoff
+    - Retry only retryable errors (5xx, 429)
+    - Set maximum retry attempts
+    - Use jitter to avoid thundering herd
+  </Card>
+  <Card title="Graceful Degradation" icon="shield-check">
+    - Fallback to cached data
+    - Disable non-critical features
+    - Show user-friendly error messages
+    - Provide alternative workflows
+  </Card>
+  <Card title="Circuit Breaker" icon="power-off">
+    - Stop making requests when service is down
+    - Automatically recover when service is back
+    - Prevent cascade failures
+    - Monitor service health
+  </Card>
+  <Card title="User Communication" icon="comment">
+    - Clear error messages
+    - Actionable instructions
+    - Progress indicators
+    - Support contact information
+  </Card>
+</CardGroup>
+
+<Note>
+Always implement proper error handling in production applications. Unhandled errors can lead to poor user experience and application instability.
+</Note>

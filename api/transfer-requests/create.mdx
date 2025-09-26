@@ -1,0 +1,276 @@
+---
+title: "Create Transfer Request"
+api: "POST /v1/transfer-requests"
+description: "Create a new transfer request for sending funds"
+---
+
+## Overview
+
+Create a new transfer request to send funds to a recipient. This is the recommended way to initiate transfers as it provides a streamlined flow with automatic rate calculation and payment instructions.
+
+<Note>
+Transfer requests are initially in `pending` status and require payment confirmation before processing. Use the confirm-payment endpoint once payment is made.
+</Note>
+
+## Request Body
+
+<ParamField body="amount" type="string" required>
+  Amount to transfer in source currency
+</ParamField>
+
+<ParamField body="currency" type="string" required>
+  Source currency code (e.g., `"USD"`, `"NGN"`)
+</ParamField>
+
+<ParamField body="recipient_id" type="string" required>
+  ID of the recipient to send funds to
+</ParamField>
+
+<ParamField body="rate" type="string">
+  Exchange rate to use (if not provided, current market rate will be used)
+</ParamField>
+
+<ParamField body="pair" type="string">
+  Currency pair (e.g., `"USD/USDC"`)
+</ParamField>
+
+<ParamField body="received_amount" type="string">
+  Expected amount recipient will receive
+</ParamField>
+
+<ParamField body="fee" type="string">
+  Transfer fee amount
+</ParamField>
+
+<ParamField body="reference" type="string">
+  Custom reference for this transfer
+</ParamField>
+
+<ParamField body="description" type="string">
+  Description or memo for this transfer
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Additional metadata for this transfer
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique identifier for the transfer request
+</ResponseField>
+
+<ResponseField name="reference" type="string">
+  Transfer reference ID
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Transfer status (`pending`, `processing`, `completed`, `failed`, `cancelled`)
+</ResponseField>
+
+<ResponseField name="amount" type="string">
+  Transfer amount in source currency
+</ResponseField>
+
+<ResponseField name="currency" type="string">
+  Source currency code
+</ResponseField>
+
+<ResponseField name="rate" type="string">
+  Exchange rate used
+</ResponseField>
+
+<ResponseField name="received_amount" type="string">
+  Amount recipient will receive
+</ResponseField>
+
+<ResponseField name="fee" type="string">
+  Transfer fee
+</ResponseField>
+
+<ResponseField name="recipient" type="object">
+  Recipient information
+</ResponseField>
+
+<ResponseField name="recipient.id" type="string">
+  Recipient ID
+</ResponseField>
+
+<ResponseField name="recipient.name" type="string">
+  Recipient name
+</ResponseField>
+
+<ResponseField name="recipient.email" type="string">
+  Recipient email
+</ResponseField>
+
+<ResponseField name="payment_instructions" type="object">
+  Instructions for completing payment
+</ResponseField>
+
+<ResponseField name="payment_instructions.amount" type="string">
+  Amount to be paid
+</ResponseField>
+
+<ResponseField name="payment_instructions.currency" type="string">
+  Currency for payment
+</ResponseField>
+
+<ResponseField name="payment_instructions.reference" type="string">
+  Reference to include with payment
+</ResponseField>
+
+<ResponseField name="payment_instructions.account_details" type="object">
+  Account details for payment
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation timestamp (ISO 8601)
+</ResponseField>
+
+<ResponseField name="expires_at" type="string">
+  Payment expiration timestamp (ISO 8601)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.railsfromthecrypt.com/v1/transfer-requests" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "1000.00",
+    "currency": "NGN",
+    "recipient_id": "rec_123e4567-e89b-12d3-a456-426614174000",
+    "description": "Payment for services"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/transfer-requests', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    amount: '1000.00',
+    currency: 'NGN',
+    recipient_id: 'rec_123e4567-e89b-12d3-a456-426614174000',
+    description: 'Payment for services'
+  })
+});
+
+const transferRequest = await response.json();
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "id": "tr_123e4567-e89b-12d3-a456-426614174000",
+  "reference": "TXN-1234567890",
+  "status": "pending",
+  "amount": "1000.00",
+  "currency": "NGN",
+  "rate": "0.0008",
+  "received_amount": "0.80",
+  "fee": "10.00",
+  "recipient": {
+    "id": "rec_123e4567-e89b-12d3-a456-426614174000",
+    "name": "John Doe",
+    "email": "john.doe@example.com"
+  },
+  "payment_instructions": {
+    "amount": "1000.00",
+    "currency": "NGN",
+    "reference": "TXN-1234567890",
+    "account_details": {
+      "bank_name": "First Bank of Nigeria",
+      "account_number": "1234567890",
+      "account_name": "HashRails Limited",
+      "routing_code": "011"
+    }
+  },
+  "created_at": "2024-01-01T12:00:00Z",
+  "expires_at": "2024-01-01T12:05:00Z"
+}
+```
+
+</ResponseExample>
+
+## Usage Examples
+
+### Create Transfer Request
+
+<CodeGroup>
+
+```javascript JavaScript
+async function createTransferRequest(transferData) {
+  try {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/transfer-requests', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(transferData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create transfer request');
+    }
+
+    const transferRequest = await response.json();
+    return transferRequest;
+  } catch (error) {
+    console.error('Error creating transfer request:', error);
+    throw error;
+  }
+}
+
+// Usage
+const transferData = {
+  amount: '1000.00',
+  currency: 'NGN',
+  recipient_id: 'rec_123e4567-e89b-12d3-a456-426614174000',
+  description: 'Payment for services'
+};
+
+const transferRequest = await createTransferRequest(transferData);
+```
+
+</CodeGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="List Transfer Requests"
+    icon="list"
+    href="/api/transfer-requests/list"
+  >
+    Get list of all transfer requests
+  </Card>
+  <Card
+    title="Get Transfer Request"
+    icon="search"
+    href="/api/transfer-requests/get"
+  >
+    Get specific transfer request details
+  </Card>
+  <Card
+    title="Confirm Payment"
+    icon="check"
+    href="/api/transfer-requests/confirm-payment"
+  >
+    Confirm payment for transfer request
+  </Card>
+</CardGroup>

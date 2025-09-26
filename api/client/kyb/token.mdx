@@ -1,0 +1,478 @@
+---
+title: "Get KYB Token"
+api: "GET /v1/client/kyb/token"
+description: "Get KYB verification token for client"
+---
+
+## Overview
+
+Get a Know Your Business (KYB) verification token for a client. This endpoint generates a secure token that can be used to initiate the KYB verification process.
+
+<Note>
+  This endpoint requires authentication via Bearer token in the Authorization header.
+</Note>
+
+## Request
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication. Format: `Bearer <access_token>`
+</ParamField>
+
+<ParamField query="client_id" type="string" required>
+  Client ID to get KYB token for.
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the KYB token was generated successfully.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Success message.
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  KYB token data.
+</ResponseField>
+
+<ResponseField name="data.token" type="string">
+  KYB verification token.
+</ResponseField>
+
+<ResponseField name="data.client_id" type="string">
+  Client ID.
+</ResponseField>
+
+<ResponseField name="data.expires_at" type="string">
+  Token expiration timestamp.
+</ResponseField>
+
+<ResponseField name="data.verification_url" type="string">
+  URL for KYB verification process.
+</ResponseField>
+
+<ResponseField name="data.required_documents" type="array">
+  List of required documents for KYB verification.
+</ResponseField>
+
+<ResponseField name="data.required_documents[].type" type="string">
+  Document type (e.g., "certificate_of_incorporation", "articles_of_association").
+</ResponseField>
+
+<ResponseField name="data.required_documents[].name" type="string">
+  Document name.
+</ResponseField>
+
+<ResponseField name="data.required_documents[].description" type="string">
+  Document description.
+</ResponseField>
+
+<ResponseField name="data.required_documents[].required" type="boolean">
+  Whether the document is required.
+</ResponseField>
+
+<ResponseField name="data.required_documents[].format" type="array">
+  Accepted file formats.
+</ResponseField>
+
+<ResponseField name="data.required_documents[].max_size" type="number">
+  Maximum file size in bytes.
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://api.railsfromthecrypt.com/v1/client/kyb/token?client_id=client_1234567890" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/client/kyb/token?client_id=client_1234567890', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.railsfromthecrypt.com/v1/client/kyb/token',
+    params={'client_id': 'client_1234567890'},
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+</CodeGroup>
+
+## Example Response
+
+<ResponseExample>
+
+```json Success Response
+{
+  "success": true,
+  "message": "KYB token generated successfully",
+  "data": {
+    "token": "kyb_token_abc123def456",
+    "client_id": "client_1234567890",
+    "expires_at": "2024-01-01T18:00:00Z",
+    "verification_url": "https://kyb.hashrails.xyz/verify/kyb_token_abc123def456",
+    "required_documents": [
+      {
+        "type": "certificate_of_incorporation",
+        "name": "Certificate of Incorporation",
+        "description": "Official certificate of incorporation from the state",
+        "required": true,
+        "format": ["pdf", "jpg", "png"],
+        "max_size": 10485760
+      },
+      {
+        "type": "articles_of_association",
+        "name": "Articles of Association",
+        "description": "Articles of association or bylaws",
+        "required": true,
+        "format": ["pdf", "jpg", "png"],
+        "max_size": 10485760
+      },
+      {
+        "type": "proof_of_address",
+        "name": "Proof of Business Address",
+        "description": "Utility bill or bank statement showing business address",
+        "required": true,
+        "format": ["pdf", "jpg", "png"],
+        "max_size": 10485760
+      },
+      {
+        "type": "authorized_signatory_id",
+        "name": "Authorized Signatory ID",
+        "description": "Government-issued ID of the authorized signatory",
+        "required": true,
+        "format": ["pdf", "jpg", "png"],
+        "max_size": 10485760
+      },
+      {
+        "type": "bank_statement",
+        "name": "Bank Statement",
+        "description": "Recent bank statement (last 3 months)",
+        "required": false,
+        "format": ["pdf", "jpg", "png"],
+        "max_size": 10485760
+      }
+    ]
+  }
+}
+```
+
+</ResponseExample>
+
+## Error Responses
+
+<ResponseExample>
+
+```json Client Not Found
+{
+  "success": false,
+  "message": "Client not found",
+  "error": {
+    "code": "CLIENT_NOT_FOUND",
+    "type": "not_found_error",
+    "details": "The specified client does not exist"
+  }
+}
+```
+
+```json KYB Already Initiated
+{
+  "success": false,
+  "message": "KYB verification already initiated",
+  "error": {
+    "code": "KYB_ALREADY_INITIATED",
+    "type": "validation_error",
+    "details": "KYB verification has already been initiated for this client"
+  }
+}
+```
+
+```json Unauthorized
+{
+  "success": false,
+  "message": "Unauthorized",
+  "error": {
+    "code": "UNAUTHORIZED",
+    "type": "authentication_error",
+    "details": "Invalid or expired token"
+  }
+}
+```
+
+</ResponseExample>
+
+## Status Codes
+
+<ResponseField name="200" type="number">
+  KYB token generated successfully
+</ResponseField>
+
+<ResponseField name="400" type="number">
+  Bad request - validation errors
+</ResponseField>
+
+<ResponseField name="401" type="number">
+  Unauthorized - invalid or expired token
+</ResponseField>
+
+<ResponseField name="404" type="number">
+  Not found - client not found
+</ResponseField>
+
+<ResponseField name="409" type="number">
+  Conflict - KYB already initiated
+</ResponseField>
+
+<ResponseField name="500" type="number">
+  Internal server error
+</ResponseField>
+
+## Required Documents
+
+### Core Business Documents
+
+<CardGroup cols={2}>
+  <Card title="Certificate of Incorporation" icon="file">
+    - **Type**: certificate_of_incorporation
+    - **Required**: Yes
+    - **Description**: Official certificate from state
+    - **Formats**: PDF, JPG, PNG
+  </Card>
+  <Card title="Articles of Association" icon="file">
+    - **Type**: articles_of_association
+    - **Required**: Yes
+    - **Description**: Company bylaws or articles
+    - **Formats**: PDF, JPG, PNG
+  </Card>
+  <Card title="Proof of Address" icon="home">
+    - **Type**: proof_of_address
+    - **Required**: Yes
+    - **Description**: Utility bill or bank statement
+    - **Formats**: PDF, JPG, PNG
+  </Card>
+  <Card title="Authorized Signatory ID" icon="id-card">
+    - **Type**: authorized_signatory_id
+    - **Required**: Yes
+    - **Description**: Government-issued ID
+    - **Formats**: PDF, JPG, PNG
+  </Card>
+</CardGroup>
+
+### Additional Documents
+
+<CardGroup cols={2}>
+  <Card title="Bank Statement" icon="university">
+    - **Type**: bank_statement
+    - **Required**: No
+    - **Description**: Recent bank statement
+    - **Formats**: PDF, JPG, PNG
+  </Card>
+  <Card title="Business License" icon="certificate">
+    - **Type**: business_license
+    - **Required**: No
+    - **Description**: Business operating license
+    - **Formats**: PDF, JPG, PNG
+  </Card>
+</CardGroup>
+
+## Implementation Example
+
+<CodeGroup>
+
+```javascript JavaScript
+class KYBManager {
+  constructor(apiClient) {
+    this.apiClient = apiClient;
+  }
+  
+  async getKYBToken(clientId) {
+    try {
+      const response = await this.apiClient.get(`/v1/client/kyb/token?client_id=${clientId}`);
+      
+      if (response.success) {
+        this.storeKYBToken(response.data);
+        return response.data;
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      console.error('Failed to get KYB token:', error);
+      throw error;
+    }
+  }
+  
+  storeKYBToken(kybData) {
+    // Store KYB token and data
+    localStorage.setItem('kyb_token', kybData.token);
+    localStorage.setItem('kyb_data', JSON.stringify(kybData));
+  }
+  
+  getKYBToken() {
+    return localStorage.getItem('kyb_token');
+  }
+  
+  getKYBData() {
+    const kybData = localStorage.getItem('kyb_data');
+    return kybData ? JSON.parse(kybData) : null;
+  }
+  
+  clearKYBData() {
+    localStorage.removeItem('kyb_token');
+    localStorage.removeItem('kyb_data');
+  }
+  
+  displayRequiredDocuments(requiredDocuments) {
+    const documentsContainer = document.getElementById('required-documents');
+    
+    documentsContainer.innerHTML = `
+      <h3>Required Documents</h3>
+      <div class="documents-list">
+        ${requiredDocuments.map(doc => `
+          <div class="document-item ${doc.required ? 'required' : 'optional'}">
+            <div class="document-info">
+              <h4>${doc.name}</h4>
+              <p>${doc.description}</p>
+              <div class="document-details">
+                <span class="status ${doc.required ? 'required' : 'optional'}">
+                  ${doc.required ? 'Required' : 'Optional'}
+                </span>
+                <span class="formats">Formats: ${doc.format.join(', ').toUpperCase()}</span>
+                <span class="max-size">Max size: ${this.formatFileSize(doc.max_size)}</span>
+              </div>
+            </div>
+            <div class="document-upload">
+              <input type="file" 
+                     id="upload-${doc.type}" 
+                     accept="${doc.format.map(f => `.${f}`).join(',')}"
+                     data-document-type="${doc.type}"
+                     data-max-size="${doc.max_size}">
+              <label for="upload-${doc.type}" class="upload-button">
+                Upload ${doc.name}
+              </label>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+  
+  async initiateKYBVerification(clientId) {
+    try {
+      const kybData = await this.getKYBToken(clientId);
+      
+      // Display required documents
+      this.displayRequiredDocuments(kybData.required_documents);
+      
+      // Show verification URL
+      const verificationUrl = document.getElementById('verification-url');
+      verificationUrl.href = kybData.verification_url;
+      verificationUrl.textContent = 'Start KYB Verification';
+      
+      return kybData;
+    } catch (error) {
+      console.error('Failed to initiate KYB verification:', error);
+      throw error;
+    }
+  }
+}
+
+// Usage
+const kybManager = new KYBManager(apiClient);
+
+// Initiate KYB verification
+document.getElementById('start-kyb').addEventListener('click', async () => {
+  const clientId = 'client_1234567890';
+  
+  try {
+    const kybData = await kybManager.initiateKYBVerification(clientId);
+    console.log('KYB verification initiated:', kybData);
+  } catch (error) {
+    console.error('Failed to initiate KYB verification:', error);
+  }
+});
+```
+
+</CodeGroup>
+
+## Security Considerations
+
+<AccordionGroup>
+  <Accordion title="Token Security">
+    - KYB tokens are cryptographically secure
+    - Tokens expire after a reasonable time
+    - Tokens are single-use for security
+    - Store tokens securely
+  </Accordion>
+  <Accordion title="Document Security">
+    - Documents are encrypted in transit
+    - Secure storage of uploaded documents
+    - Access controls for document viewing
+    - Audit trail for document access
+  </Accordion>
+  <Accordion title="Verification Process">
+    - Multi-step verification process
+    - Human review of documents
+    - Compliance with regulations
+    - Regular security audits
+  </Accordion>
+</AccordionGroup>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card
+    title="KYB Link"
+    icon="link"
+    href="/api/client/kyb/link"
+  >
+    Get KYB verification link
+  </Card>
+  <Card
+    title="KYB Status"
+    icon="check-circle"
+    href="/api/client/kyb/status"
+  >
+    Check KYB verification status
+  </Card>
+  <Card
+    title="KYB Documents"
+    icon="file"
+    href="/api/client/kyb/documents"
+  >
+    Upload KYB documents
+  </Card>
+  <Card
+    title="Create Client"
+    icon="plus"
+    href="/api/client/create"
+  >
+    Create a new client account
+  </Card>
+</CardGroup>

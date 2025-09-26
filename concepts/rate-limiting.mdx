@@ -1,0 +1,644 @@
+---
+title: "Rate Limiting"
+description: "Understanding rate limits and how to handle them in HR API"
+---
+
+## Overview
+
+HR API implements rate limiting to ensure fair usage and system stability. This guide explains how rate limiting works, what the limits are, and how to handle rate limit responses properly.
+
+## Rate Limits
+
+### Authenticated Requests
+
+<CardGroup cols={2}>
+  <Card title="Standard Users" icon="user">
+    **1,000 requests per hour**
+    
+    - All authenticated API calls
+    - Per user account
+    - Resets every hour
+  </Card>
+  <Card title="Premium Users" icon="crown">
+    **5,000 requests per hour**
+    
+    - Higher limits for premium accounts
+    - Contact support for upgrade
+    - Includes all API endpoints
+  </Card>
+</CardGroup>
+
+### Unauthenticated Requests
+
+<CardGroup cols={2}>
+  <Card title="Public Endpoints" icon="globe">
+    **100 requests per hour**
+    
+    - Health check endpoints
+    - Public documentation
+    - Per IP address
+  </Card>
+  <Card title="Login Attempts" icon="key">
+    **10 attempts per hour**
+    
+    - Login endpoint
+    - Password reset requests
+    - Per IP address
+  </Card>
+</CardGroup>
+
+### Webhook Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Webhook Delivery" icon="webhook">
+    **1,000 deliveries per hour**
+    
+    - Per webhook endpoint
+    - Includes retry attempts
+    - Separate from API limits
+  </Card>
+  <Card title="Webhook Testing" icon="flask">
+    **100 test requests per hour**
+    
+    - Webhook test endpoint
+    - Per client account
+    - Development use only
+  </Card>
+</CardGroup>
+
+## Rate Limit Headers
+
+All API responses include rate limit information in the headers:
+
+<CodeGroup>
+
+```http Response Headers
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
+X-RateLimit-Reset: 1640995200
+X-RateLimit-Retry-After: 3600
+```
+
+</CodeGroup>
+
+### Header Descriptions
+
+<ResponseField name="X-RateLimit-Limit" type="number">
+  Maximum number of requests allowed in the current window
+</ResponseField>
+
+<ResponseField name="X-RateLimit-Remaining" type="number">
+  Number of requests remaining in the current window
+</ResponseField>
+
+<ResponseField name="X-RateLimit-Reset" type="number">
+  Unix timestamp when the rate limit resets
+</ResponseField>
+
+<ResponseField name="X-RateLimit-Retry-After" type="number">
+  Number of seconds to wait before retrying (only present when rate limited)
+</ResponseField>
+
+## Rate Limit Response
+
+When you exceed the rate limit, you'll receive a 429 status code:
+
+<ResponseExample>
+
+```json Rate Limit Exceeded
+{
+  "success": false,
+  "message": "Rate limit exceeded",
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "type": "rate_limit_error",
+    "details": "1000 requests per hour limit exceeded"
+  },
+  "retry_after": 3600,
+  "timestamp": "2024-01-01T12:00:00Z"
+}
+```
+
+</ResponseExample>
+
+## Handling Rate Limits
+
+### Client-Side Implementation
+
+<CodeGroup>
+
+```javascript JavaScript
+class RateLimitHandler {
+  constructor() {
+    this.retryAfter = 0;
+  }
+
+  async makeRequest(url, options = {}) {
+    // Check if we're currently rate limited
+    if (this.retryAfter > Date.now()) {
+      const waitTime = this.retryAfter - Date.now();
+      console.log(`Rate limited. Waiting ${waitTime}ms`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+
+    try {
+      const response = await fetch(url, options);
+      
+      // Check rate limit headers
+      const limit = response.headers.get('X-RateLimit-Limit');
+      const remaining = response.headers.get('X-RateLimit-Remaining');
+      const reset = response.headers.get('X-RateLimit-Reset');
+      
+      console.log(`Rate limit: ${remaining}/${limit}, resets at ${new Date(reset * 1000)}`);
+      
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('X-RateLimit-Retry-After');
+        this.retryAfter = Date.now() + (retryAfter * 1000);
+        
+        // Wait and retry
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+        return this.makeRequest(url, options);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Request failed:', error);
+      throw error;
+    }
+  }
+}
+
+// Usage
+const rateLimitHandler = new RateLimitHandler();
+const response = await rateLimitHandler.makeRequest('https://api.railsfromthecrypt.com/v1/transactions', {
+  headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+});
+```
+
+```python Python
+import time
+import requests
+from datetime import datetime
+
+class RateLimitHandler:
+    def __init__(self):
+        self.retry_after = 0
+    
+    def make_request(self, url, **kwargs):
+        # Check if we're currently rate limited
+        if self.retry_after > time.time():
+            wait_time = self.retry_after - time.time()
+            print(f"Rate limited. Waiting {wait_time:.2f} seconds")
+            time.sleep(wait_time)
+        
+        try:
+            response = requests.get(url, **kwargs)
+            
+            # Check rate limit headers
+            limit = response.headers.get('X-RateLimit-Limit')
+            remaining = response.headers.get('X-RateLimit-Remaining')
+            reset = response.headers.get('X-RateLimit-Reset')
+            
+            if limit and remaining and reset:
+                reset_time = datetime.fromtimestamp(int(reset))
+                print(f"Rate limit: {remaining}/{limit}, resets at {reset_time}")
+            
+            if response.status_code == 429:
+                retry_after = int(response.headers.get('X-RateLimit-Retry-After', 3600))
+                self.retry_after = time.time() + retry_after
+                
+                # Wait and retry
+                time.sleep(retry_after)
+                return self.make_request(url, **kwargs)
+            
+            return response
+            
+        except requests.exceptions.RequestException as error:
+            print(f"Request failed: {error}")
+            raise error
+
+# Usage
+rate_limit_handler = RateLimitHandler()
+response = rate_limit_handler.make_request(
+    'https://api.railsfromthecrypt.com/v1/transactions',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+```
+
+</CodeGroup>
+
+### Exponential Backoff
+
+<CodeGroup>
+
+```javascript JavaScript
+async function withExponentialBackoff(fn, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (error.status === 429 && attempt < maxRetries - 1) {
+        const retryAfter = error.headers.get('X-RateLimit-Retry-After') || Math.pow(2, attempt);
+        const delay = retryAfter * 1000;
+        
+        console.log(`Rate limited. Retrying in ${delay}ms (attempt ${attempt + 1})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      throw error;
+    }
+  }
+}
+
+// Usage
+const result = await withExponentialBackoff(async () => {
+  const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+    headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  
+  return response.json();
+});
+```
+
+</CodeGroup>
+
+## Best Practices
+
+### Request Optimization
+
+<AccordionGroup>
+  <Accordion title="Batch Operations">
+    - Use batch endpoints when available
+    - Combine multiple operations into single requests
+    - Implement request queuing for high-volume operations
+    - Cache responses to reduce API calls
+  </Accordion>
+  <Accordion title="Pagination">
+    - Use appropriate page sizes (10-100 items)
+    - Implement client-side caching
+    - Only fetch data when needed
+    - Use filters to reduce data volume
+  </Accordion>
+  <Accordion title="Polling">
+    - Use WebSocket connections instead of polling
+    - Implement exponential backoff for polling
+    - Use webhooks for real-time updates
+    - Set reasonable polling intervals
+  </Accordion>
+</AccordionGroup>
+
+### Monitoring and Alerting
+
+<CodeGroup>
+
+```javascript JavaScript
+class RateLimitMonitor {
+  constructor() {
+    this.usage = {
+      requests: 0,
+      limit: 1000,
+      resetTime: null
+    };
+  }
+  
+  updateFromHeaders(headers) {
+    this.usage.limit = parseInt(headers.get('X-RateLimit-Limit')) || 1000;
+    this.usage.remaining = parseInt(headers.get('X-RateLimit-Remaining')) || 0;
+    this.usage.resetTime = parseInt(headers.get('X-RateLimit-Reset')) || null;
+    
+    // Alert when usage is high
+    const usagePercent = ((this.usage.limit - this.usage.remaining) / this.usage.limit) * 100;
+    if (usagePercent > 80) {
+      console.warn(`High API usage: ${usagePercent.toFixed(1)}% of rate limit used`);
+    }
+  }
+  
+  getUsageStats() {
+    return {
+      ...this.usage,
+      usagePercent: ((this.usage.limit - this.usage.remaining) / this.usage.limit) * 100,
+      timeUntilReset: this.usage.resetTime ? this.usage.resetTime - Math.floor(Date.now() / 1000) : null
+    };
+  }
+}
+
+// Usage
+const monitor = new RateLimitMonitor();
+
+// Update after each request
+const response = await fetch(url, options);
+monitor.updateFromHeaders(response.headers);
+
+console.log('Usage stats:', monitor.getUsageStats());
+```
+
+</CodeGroup>
+
+## Rate Limit Strategies
+
+### Application-Level Throttling
+
+<CodeGroup>
+
+```javascript JavaScript
+class RequestThrottler {
+  constructor(maxRequests = 900, windowMs = 3600000) { // 900 requests per hour
+    this.maxRequests = maxRequests;
+    this.windowMs = windowMs;
+    this.requests = [];
+  }
+  
+  async throttle(fn) {
+    const now = Date.now();
+    
+    // Remove old requests outside the window
+    this.requests = this.requests.filter(time => now - time < this.windowMs);
+    
+    // Check if we can make a request
+    if (this.requests.length >= this.maxRequests) {
+      const oldestRequest = Math.min(...this.requests);
+      const waitTime = this.windowMs - (now - oldestRequest);
+      
+      console.log(`Throttling: waiting ${waitTime}ms`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    
+    // Record this request
+    this.requests.push(now);
+    
+    return fn();
+  }
+}
+
+// Usage
+const throttler = new RequestThrottler(900, 3600000); // 900 requests per hour
+
+const result = await throttler.throttle(async () => {
+  return fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+    headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+  });
+});
+```
+
+</CodeGroup>
+
+### Circuit Breaker Pattern
+
+<CodeGroup>
+
+```javascript JavaScript
+class CircuitBreaker {
+  constructor(threshold = 5, timeout = 60000) {
+    this.failureCount = 0;
+    this.threshold = threshold;
+    this.timeout = timeout;
+    this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
+    this.nextAttempt = Date.now();
+  }
+  
+  async execute(fn) {
+    if (this.state === 'OPEN') {
+      if (Date.now() < this.nextAttempt) {
+        throw new Error('Circuit breaker is OPEN');
+      }
+      this.state = 'HALF_OPEN';
+    }
+    
+    try {
+      const result = await fn();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+  
+  onSuccess() {
+    this.failureCount = 0;
+    this.state = 'CLOSED';
+  }
+  
+  onFailure() {
+    this.failureCount++;
+    if (this.failureCount >= this.threshold) {
+      this.state = 'OPEN';
+      this.nextAttempt = Date.now() + this.timeout;
+    }
+  }
+}
+
+// Usage
+const circuitBreaker = new CircuitBreaker(5, 60000);
+
+try {
+  const result = await circuitBreaker.execute(async () => {
+    const response = await fetch('https://api.railsfromthecrypt.com/v1/transactions', {
+      headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+    });
+    
+    if (response.status === 429) {
+      throw new Error('Rate limited');
+    }
+    
+    return response.json();
+  });
+} catch (error) {
+  console.error('Request failed:', error.message);
+}
+```
+
+</CodeGroup>
+
+## Common Scenarios
+
+### High-Volume Applications
+
+<AccordionGroup>
+  <Accordion title="Background Processing">
+    - Use job queues for non-urgent operations
+    - Implement request batching
+    - Use multiple API keys for different services
+    - Consider upgrading to premium limits
+  </Accordion>
+  <Accordion title="Real-time Applications">
+    - Use WebSocket connections for real-time data
+    - Implement efficient polling strategies
+    - Use webhooks for event-driven updates
+    - Cache frequently accessed data
+  </Accordion>
+  <Accordion title="Data Synchronization">
+    - Use incremental sync instead of full sync
+    - Implement smart caching strategies
+    - Use pagination effectively
+    - Schedule sync operations during off-peak hours
+  </Accordion>
+</AccordionGroup>
+
+### Development and Testing
+
+<AccordionGroup>
+  <Accordion title="Local Development">
+    - Use staging environment for testing
+    - Implement request mocking for unit tests
+    - Use smaller datasets for development
+    - Monitor rate limit usage during development
+  </Accordion>
+  <Accordion title="CI/CD Pipelines">
+    - Use dedicated test API keys
+    - Implement proper test data cleanup
+    - Use parallel test execution carefully
+    - Monitor rate limits in CI environments
+  </Accordion>
+</AccordionGroup>
+
+## Monitoring and Analytics
+
+### Usage Tracking
+
+<CodeGroup>
+
+```javascript JavaScript
+class APIAnalytics {
+  constructor() {
+    this.metrics = {
+      totalRequests: 0,
+      rateLimitedRequests: 0,
+      averageResponseTime: 0,
+      errorRate: 0
+    };
+    this.requestTimes = [];
+  }
+  
+  recordRequest(response, startTime) {
+    const responseTime = Date.now() - startTime;
+    this.requestTimes.push(responseTime);
+    
+    this.metrics.totalRequests++;
+    
+    if (response.status === 429) {
+      this.metrics.rateLimitedRequests++;
+    }
+    
+    if (!response.ok) {
+      this.metrics.errorRate = (this.metrics.errorRate * (this.metrics.totalRequests - 1) + 1) / this.metrics.totalRequests;
+    }
+    
+    // Keep only last 100 response times
+    if (this.requestTimes.length > 100) {
+      this.requestTimes.shift();
+    }
+    
+    this.metrics.averageResponseTime = this.requestTimes.reduce((a, b) => a + b, 0) / this.requestTimes.length;
+  }
+  
+  getMetrics() {
+    return {
+      ...this.metrics,
+      rateLimitHitRate: this.metrics.rateLimitedRequests / this.metrics.totalRequests,
+      requestsPerMinute: this.metrics.totalRequests / (Date.now() / 60000)
+    };
+  }
+}
+
+// Usage
+const analytics = new APIAnalytics();
+
+const startTime = Date.now();
+const response = await fetch(url, options);
+analytics.recordRequest(response, startTime);
+
+console.log('API Metrics:', analytics.getMetrics());
+```
+
+</CodeGroup>
+
+## Troubleshooting
+
+### Common Issues
+
+<CardGroup cols={2}>
+  <Card title="Unexpected Rate Limiting" icon="exclamation-triangle">
+    - Check for multiple API keys
+    - Verify request batching
+    - Review polling frequency
+    - Check for retry loops
+  </Card>
+  <Card title="Slow Response Times" icon="clock">
+    - Implement request queuing
+    - Use connection pooling
+    - Optimize request payloads
+    - Consider caching strategies
+  </Card>
+  <Card title="Inconsistent Limits" icon="question">
+    - Verify account type
+    - Check for rate limit resets
+    - Review usage patterns
+    - Contact support if needed
+  </Card>
+  <Card title="Development Issues" icon="bug">
+    - Use staging environment
+    - Implement proper mocking
+    - Monitor development usage
+    - Use test-specific keys
+  </Card>
+</CardGroup>
+
+## Support and Upgrades
+
+### Getting Help
+
+If you're consistently hitting rate limits:
+
+1. **Review your usage patterns** - Are you making unnecessary requests?
+2. **Implement caching** - Reduce redundant API calls
+3. **Optimize your code** - Use batch operations and efficient polling
+4. **Contact support** - We can help optimize your integration
+
+### Rate Limit Upgrades
+
+For high-volume applications, we offer:
+
+- **Premium accounts** with higher rate limits
+- **Custom rate limits** for enterprise customers
+- **Dedicated infrastructure** for mission-critical applications
+
+Contact [support@hashrails.xyz](mailto:support@hashrails.xyz) to discuss your rate limit needs.
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card
+    title="Error Handling"
+    icon="exclamation-triangle"
+    href="/concepts/error-handling"
+  >
+    Learn about handling API errors including rate limits
+  </Card>
+  <Card
+    title="Webhooks"
+    icon="webhook"
+    href="/concepts/webhooks"
+  >
+    Use webhooks to reduce polling and API calls
+  </Card>
+  <Card
+    title="Best Practices"
+    icon="star"
+    href="/quickstart"
+  >
+    General API integration best practices
+  </Card>
+  <Card
+    title="Support"
+    icon="headset"
+    href="mailto:support@hashrails.xyz"
+  >
+    Get help with rate limiting issues
+  </Card>
+</CardGroup>

@@ -1,0 +1,817 @@
+---
+title: "Webhooks"
+description: "Set up real-time notifications for your application with HR API webhooks"
+---
+
+## Overview
+
+Webhooks allow HR API to send real-time notifications to your application when specific events occur. This enables you to build responsive applications that react immediately to changes in your financial data.
+
+## How Webhooks Work
+
+<Steps>
+  <Step title="Event Occurs">
+    An event happens in the HR API system (e.g., payment received, transaction completed)
+  </Step>
+  <Step title="Webhook Triggered">
+    HR API identifies that a webhook should be sent for this event
+  </Step>
+  <Step title="HTTP POST Sent">
+    A POST request is sent to your configured webhook URL with event data
+  </Step>
+  <Step title="Your Application Responds">
+    Your application processes the webhook and responds with HTTP 200
+  </Step>
+  <Step title="Retry on Failure">
+    If your application doesn't respond with 200, HR API will retry the webhook
+  </Step>
+</Steps>
+
+## Setting Up Webhooks
+
+### 1. Create a Webhook
+
+First, create a webhook endpoint in your application and configure it with HR API:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "Production Webhook",
+    "url": "https://your-app.com/webhooks/hr",
+    "secret_key": "your-secret-key-here",
+    "environment": "live"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/webhooks', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    label: 'Production Webhook',
+    url: 'https://your-app.com/webhooks/hr',
+    secret_key: 'your-secret-key-here',
+    environment: 'live'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/webhooks',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'label': 'Production Webhook',
+        'url': 'https://your-app.com/webhooks/hr',
+        'secret_key': 'your-secret-key-here',
+        'environment': 'live'
+    }
+)
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Response
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "label": "Production Webhook",
+  "url": "https://your-app.com/webhooks/hr",
+  "status": "active",
+  "secret_key": "your-secret-key-here",
+  "environment": "live",
+  "created_at": "2024-01-01T00:00:00Z",
+  "updated_at": "2024-01-01T00:00:00Z"
+}
+```
+
+</ResponseExample>
+
+### 2. Implement Webhook Handler
+
+Create an endpoint in your application to receive webhooks:
+
+<CodeGroup>
+
+```javascript Node.js/Express
+const express = require('express');
+const crypto = require('crypto');
+const app = express();
+
+app.use(express.json());
+
+app.post('/webhooks/hr', (req, res) => {
+  // Verify webhook signature
+  const signature = req.headers['x-hr-signature'];
+  const payload = JSON.stringify(req.body);
+  const secret = 'your-secret-key-here';
+  
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  
+  if (signature !== expectedSignature) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // Process the webhook
+  const event = req.body;
+  console.log('Received webhook:', event);
+  
+  // Handle different event types
+  switch (event.type) {
+    case 'payment.received':
+      handlePaymentReceived(event.data);
+      break;
+    case 'transaction.completed':
+      handleTransactionCompleted(event.data);
+      break;
+    case 'virtual_account.created':
+      handleVirtualAccountCreated(event.data);
+      break;
+    default:
+      console.log('Unknown event type:', event.type);
+  }
+  
+  res.status(200).send('OK');
+});
+
+function handlePaymentReceived(data) {
+  console.log('Payment received:', data);
+  // Update your database, send notifications, etc.
+}
+
+function handleTransactionCompleted(data) {
+  console.log('Transaction completed:', data);
+  // Update transaction status, notify users, etc.
+}
+
+function handleVirtualAccountCreated(data) {
+  console.log('Virtual account created:', data);
+  // Store virtual account details, update UI, etc.
+}
+```
+
+```python Flask
+from flask import Flask, request, jsonify
+import hmac
+import hashlib
+import json
+
+app = Flask(__name__)
+
+@app.route('/webhooks/hr', methods=['POST'])
+def handle_webhook():
+    # Verify webhook signature
+    signature = request.headers.get('X-HR-Signature')
+    payload = request.get_data()
+    secret = 'your-secret-key-here'
+    
+    expected_signature = hmac.new(
+        secret.encode('utf-8'),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    
+    if signature != expected_signature:
+        return jsonify({'error': 'Invalid signature'}), 401
+    
+    # Process the webhook
+    event = request.json
+    print(f'Received webhook: {event}')
+    
+    # Handle different event types
+    event_type = event.get('type')
+    if event_type == 'payment.received':
+        handle_payment_received(event['data'])
+    elif event_type == 'transaction.completed':
+        handle_transaction_completed(event['data'])
+    elif event_type == 'virtual_account.created':
+        handle_virtual_account_created(event['data'])
+    else:
+        print(f'Unknown event type: {event_type}')
+    
+    return jsonify({'status': 'success'}), 200
+
+def handle_payment_received(data):
+    print(f'Payment received: {data}')
+    # Update your database, send notifications, etc.
+
+def handle_transaction_completed(data):
+    print(f'Transaction completed: {data}')
+    # Update transaction status, notify users, etc.
+
+def handle_virtual_account_created(data):
+    print(f'Virtual account created: {data}')
+    # Store virtual account details, update UI, etc.
+```
+
+```php Laravel
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class WebhookController extends Controller
+{
+    public function handle(Request $request)
+    {
+        // Verify webhook signature
+        $signature = $request->header('X-HR-Signature');
+        $payload = $request->getContent();
+        $secret = 'your-secret-key-here';
+        
+        $expectedSignature = hash_hmac('sha256', $payload, $secret);
+        
+        if ($signature !== $expectedSignature) {
+            return response()->json(['error' => 'Invalid signature'], 401);
+        }
+        
+        // Process the webhook
+        $event = $request->json()->all();
+        Log::info('Received webhook', $event);
+        
+        // Handle different event types
+        switch ($event['type']) {
+            case 'payment.received':
+                $this->handlePaymentReceived($event['data']);
+                break;
+            case 'transaction.completed':
+                $this->handleTransactionCompleted($event['data']);
+                break;
+            case 'virtual_account.created':
+                $this->handleVirtualAccountCreated($event['data']);
+                break;
+            default:
+                Log::info('Unknown event type: ' . $event['type']);
+        }
+        
+        return response()->json(['status' => 'success']);
+    }
+    
+    private function handlePaymentReceived($data)
+    {
+        Log::info('Payment received', $data);
+        // Update your database, send notifications, etc.
+    }
+    
+    private function handleTransactionCompleted($data)
+    {
+        Log::info('Transaction completed', $data);
+        // Update transaction status, notify users, etc.
+    }
+    
+    private function handleVirtualAccountCreated($data)
+    {
+        Log::info('Virtual account created', $data);
+        // Store virtual account details, update UI, etc.
+    }
+}
+```
+
+</CodeGroup>
+
+## Webhook Events
+
+HR API sends webhooks for the following events:
+
+<AccordionGroup>
+  <Accordion title="Payment Events">
+    - **payment.received**: Payment received into a virtual account
+    - **payment.failed**: Payment failed or was rejected
+    - **payment.reversed**: Payment was reversed or refunded
+  </Accordion>
+  <Accordion title="Transaction Events">
+    - **transaction.created**: New transaction created
+    - **transaction.processing**: Transaction is being processed
+    - **transaction.completed**: Transaction completed successfully
+    - **transaction.failed**: Transaction failed
+    - **transaction.cancelled**: Transaction was cancelled
+  </Accordion>
+  <Accordion title="Virtual Account Events">
+    - **virtual_account.created**: New virtual account created
+    - **virtual_account.updated**: Virtual account details updated
+    - **virtual_account.suspended**: Virtual account suspended
+    - **virtual_account.expired**: Virtual account expired
+  </Accordion>
+  <Accordion title="Customer Events">
+    - **customer.created**: New customer created
+    - **customer.verified**: Customer verification completed
+    - **customer.kyc_completed**: KYC verification completed
+    - **customer.kyb_completed**: KYB verification completed
+  </Accordion>
+  <Accordion title="Transfer Request Events">
+    - **transfer_request.created**: New transfer request created
+    - **transfer_request.payment_confirmed**: Payment confirmed for transfer
+    - **transfer_request.processing**: Transfer request being processed
+    - **transfer_request.completed**: Transfer request completed
+  </Accordion>
+</AccordionGroup>
+
+## Webhook Payload Structure
+
+All webhooks follow a consistent payload structure:
+
+```json
+{
+  "id": "evt_1234567890",
+  "type": "payment.received",
+  "created": "2024-01-01T12:00:00Z",
+  "data": {
+    // Event-specific data
+  },
+  "livemode": true,
+  "pending_webhooks": 1,
+  "request": {
+    "id": "req_1234567890",
+    "idempotency_key": "idemp_1234567890"
+  }
+}
+```
+
+### Example Webhook Payloads
+
+<CodeGroup>
+
+```json Payment Received
+{
+  "id": "evt_1234567890",
+  "type": "payment.received",
+  "created": "2024-01-01T12:00:00Z",
+  "data": {
+    "virtual_account_id": "va_1234567890",
+    "amount": "1000.00",
+    "currency": "USD",
+    "reference": "PAY_1234567890",
+    "sender_name": "John Doe",
+    "sender_bank": "Chase Bank",
+    "transaction_id": "TXN_1234567890",
+    "metadata": {
+      "customer_id": "cus_1234567890",
+      "order_id": "ORD_1234567890"
+    }
+  },
+  "livemode": true,
+  "pending_webhooks": 1
+}
+```
+
+```json Transaction Completed
+{
+  "id": "evt_1234567891",
+  "type": "transaction.completed",
+  "created": "2024-01-01T12:05:00Z",
+  "data": {
+    "transaction_id": "TXN_1234567890",
+    "reference": "TXN_1234567890",
+    "amount": "1000.00",
+    "currency": "USD",
+    "status": "completed",
+    "recipient": {
+      "id": "rec_1234567890",
+      "type": "crypto",
+      "wallet_address": "0x1234567890abcdef",
+      "network": "Ethereum"
+    },
+    "fee": "10.00",
+    "exchange_rate": "1.00",
+    "completed_at": "2024-01-01T12:05:00Z"
+  },
+  "livemode": true,
+  "pending_webhooks": 1
+}
+```
+
+```json Virtual Account Created
+{
+  "id": "evt_1234567892",
+  "type": "virtual_account.created",
+  "created": "2024-01-01T12:10:00Z",
+  "data": {
+    "virtual_account_id": "va_1234567890",
+    "account_number": "1234567890",
+    "account_name": "John Doe Business",
+    "bank_name": "Chase Bank",
+    "routing_number": "021000021",
+    "currency": "USD",
+    "type": "permanent",
+    "status": "active",
+    "client_id": "cli_1234567890"
+  },
+  "livemode": true,
+  "pending_webhooks": 1
+}
+```
+
+</CodeGroup>
+
+## Security
+
+### Signature Verification
+
+All webhooks include a signature in the `X-HR-Signature` header that you should verify to ensure the webhook came from HR API:
+
+<CodeGroup>
+
+```javascript Node.js
+const crypto = require('crypto');
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  
+  return signature === expectedSignature;
+}
+
+// Usage
+const signature = req.headers['x-hr-signature'];
+const payload = JSON.stringify(req.body);
+const secret = 'your-secret-key-here';
+
+if (!verifyWebhookSignature(payload, signature, secret)) {
+  return res.status(401).send('Invalid signature');
+}
+```
+
+```python Python
+import hmac
+import hashlib
+
+def verify_webhook_signature(payload, signature, secret):
+    expected_signature = hmac.new(
+        secret.encode('utf-8'),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    
+    return hmac.compare_digest(signature, expected_signature)
+
+# Usage
+signature = request.headers.get('X-HR-Signature')
+payload = request.get_data()
+secret = 'your-secret-key-here'
+
+if not verify_webhook_signature(payload, signature, secret):
+    return jsonify({'error': 'Invalid signature'}), 401
+```
+
+```php PHP
+function verifyWebhookSignature($payload, $signature, $secret) {
+    $expectedSignature = hash_hmac('sha256', $payload, $secret);
+    return hash_equals($signature, $expectedSignature);
+}
+
+// Usage
+$signature = $request->header('X-HR-Signature');
+$payload = $request->getContent();
+$secret = 'your-secret-key-here';
+
+if (!verifyWebhookSignature($payload, $signature, $secret)) {
+    return response()->json(['error' => 'Invalid signature'], 401);
+}
+```
+
+</CodeGroup>
+
+<Warning>
+Always verify webhook signatures to prevent malicious requests. Never process webhooks without signature verification in production.
+</Warning>
+
+## Retry Logic
+
+HR API implements automatic retry logic for failed webhook deliveries:
+
+- **Initial attempt**: Immediate delivery
+- **Retry attempts**: 5 retries with exponential backoff
+- **Retry intervals**: 1m, 5m, 15m, 1h, 4h
+- **Timeout**: 30 seconds per attempt
+- **Success criteria**: HTTP 200 response within timeout
+
+<Info>
+Webhooks are considered failed if your endpoint doesn't respond with HTTP 200 within 30 seconds or returns an error status code.
+</Info>
+
+## Testing Webhooks
+
+### Test Webhook Delivery
+
+Send a test webhook to verify your endpoint is working:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/webhooks/test \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reference": "test-webhook-123",
+    "payload": {
+      "test": true,
+      "timestamp": "2024-01-01T12:00:00Z"
+    }
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/webhooks/test', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    reference: 'test-webhook-123',
+    payload: {
+      test: true,
+      timestamp: '2024-01-01T12:00:00Z'
+    }
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/webhooks/test',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'reference': 'test-webhook-123',
+        'payload': {
+            'test': True,
+            'timestamp': '2024-01-01T12:00:00Z'
+        }
+    }
+)
+```
+
+</CodeGroup>
+
+### Webhook Logs
+
+Monitor webhook delivery success and failures:
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://api.railsfromthecrypt.com/v1/webhooks/logs?limit=10&page=1" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/webhooks/logs?limit=10&page=1', {
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+});
+
+const logs = await response.json();
+console.log(logs);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.railsfromthecrypt.com/v1/webhooks/logs',
+    params={'limit': 10, 'page': 1},
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+
+logs = response.json()
+print(logs)
+```
+
+</CodeGroup>
+
+### Resend Failed Webhooks
+
+Manually resend failed webhook deliveries:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.railsfromthecrypt.com/v1/webhooks/logs/resend \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "log_id": "log_1234567890"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/webhooks/logs/resend', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    log_id: 'log_1234567890'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.railsfromthecrypt.com/v1/webhooks/logs/resend',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'log_id': 'log_1234567890'
+    }
+)
+```
+
+</CodeGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Endpoint Design">
+    - Use HTTPS for all webhook endpoints
+    - Implement idempotency to handle duplicate events
+    - Respond quickly (within 30 seconds)
+    - Return HTTP 200 for successful processing
+    - Log all webhook events for debugging
+  </Accordion>
+  <Accordion title="Error Handling">
+    - Handle network timeouts gracefully
+    - Implement proper error logging
+    - Don't throw exceptions for expected errors
+    - Use appropriate HTTP status codes
+    - Implement circuit breakers for external services
+  </Accordion>
+  <Accordion title="Security">
+    - Always verify webhook signatures
+    - Use secure secret keys
+    - Implement rate limiting on webhook endpoints
+    - Validate webhook payloads
+    - Use HTTPS for all communications
+  </Accordion>
+  <Accordion title="Monitoring">
+    - Monitor webhook delivery success rates
+    - Set up alerts for failed deliveries
+    - Track webhook processing times
+    - Monitor for duplicate events
+    - Keep webhook logs for audit purposes
+  </Accordion>
+</AccordionGroup>
+
+## Common Issues
+
+<CardGroup cols={2}>
+  <Card title="Webhook Not Received" icon="exclamation-triangle">
+    - Check webhook URL is accessible
+    - Verify webhook is active
+    - Check firewall/network settings
+    - Ensure endpoint responds with 200
+  </Card>
+  <Card title="Invalid Signature" icon="shield-exclamation">
+    - Verify secret key matches
+    - Check payload format
+    - Ensure proper signature calculation
+    - Validate header name (X-HR-Signature)
+  </Card>
+  <Card title="Timeout Errors" icon="clock">
+    - Optimize webhook processing time
+    - Use asynchronous processing
+    - Implement proper error handling
+    - Consider webhook queue system
+  </Card>
+  <Card title="Duplicate Events" icon="copy">
+    - Implement idempotency keys
+    - Check event IDs for duplicates
+    - Use database constraints
+    - Handle retry scenarios properly
+  </Card>
+</CardGroup>
+
+## Webhook Management
+
+### Update Webhook
+
+Update webhook configuration:
+
+<CodeGroup>
+
+```bash cURL
+curl -X PATCH https://api.railsfromthecrypt.com/v1/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "Updated Webhook Label",
+    "url": "https://your-new-app.com/webhooks/hr",
+    "status": "active"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/webhooks', {
+  method: 'PATCH',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    label: 'Updated Webhook Label',
+    url: 'https://your-new-app.com/webhooks/hr',
+    status: 'active'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.patch(
+    'https://api.railsfromthecrypt.com/v1/webhooks',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'label': 'Updated Webhook Label',
+        'url': 'https://your-new-app.com/webhooks/hr',
+        'status': 'active'
+    }
+)
+```
+
+</CodeGroup>
+
+### Disable/Enable Webhook
+
+Temporarily disable or enable webhooks:
+
+<CodeGroup>
+
+```bash cURL
+curl -X PATCH https://api.railsfromthecrypt.com/v1/webhooks/123e4567-e89b-12d3-a456-426614174000/status \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "inactive"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.railsfromthecrypt.com/v1/webhooks/123e4567-e89b-12d3-a456-426614174000/status', {
+  method: 'PATCH',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    status: 'inactive'
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.patch(
+    'https://api.railsfromthecrypt.com/v1/webhooks/123e4567-e89b-12d3-a456-426614174000/status',
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'status': 'inactive'
+    }
+)
+```
+
+</CodeGroup>
+
+<Note>
+Disabling a webhook will stop all webhook deliveries. Use this for maintenance or when you need to temporarily stop receiving notifications.
+</Note>
