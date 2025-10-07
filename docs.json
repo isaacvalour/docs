@@ -307,7 +307,7 @@
   ],
  "api": {
 		"mdx":{
-			"server": "https://railsfromthecrypt.com/"
+			"server": "https://api.railsfromthecrypt.com/"
 		},
     "auth": {
       "method": "bearer"
