@@ -294,10 +294,10 @@
   },
   "servers": [
     {
-      "url": "https://api.mitulabs.xyz/v1"
+      "url": "https://api.railsfromthecrypt.com/"
     },
     {
-      "url": "https://local-gateway.mitulabs.xyz/v1"
+      "url": "https://api.hashrails.com/"
     }
   ],
   "security": [
