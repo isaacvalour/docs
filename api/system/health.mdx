@@ -1,6 +1,6 @@
 ---
 title: "Health Check"
-api: "GET /v1/system/health"
+api: "GET /v1"
 description: "Check system health and status"
 ---
 
@@ -102,11 +102,13 @@ No parameters required.
 curl -X GET "https://api.railsfromthecrypt.com/v1/system/health"
 ```
 
+
 ```javascript JavaScript
 const response = await fetch('https://api.railsfromthecrypt.com/v1/system/health');
 const data = await response.json();
 console.log(data);
 ```
+
 
 ```python Python
 import requests
@@ -151,6 +153,7 @@ print(data)
 }
 ```
 
+
 ```json Degraded System
 {
   "status": "degraded",
@@ -179,6 +182,7 @@ print(data)
   }
 }
 ```
+
 
 ```json Unhealthy System
 {
@@ -228,21 +232,24 @@ print(data)
 <CardGroup cols={3}>
   <Card title="Healthy" icon="check-circle">
     All services are functioning normally
-    - Database: < 100ms response time
-    - Redis: < 10ms response time
-    - External APIs: < 1000ms response time
-    - Memory usage: < 80%
+
+    - Database: \< 100ms response time
+    - Redis: \< 10ms response time
+    - External APIs: \< 1000ms response time
+    - Memory usage: \< 80%
   </Card>
   <Card title="Degraded" icon="exclamation-triangle">
     Some services are experiencing issues
+
     - One or more services have slow response times
     - Memory usage: 80-90%
     - System is still functional but may be slow
   </Card>
   <Card title="Unhealthy" icon="times-circle">
     Critical services are down
+
     - Database or Redis is unavailable
-    - Memory usage: > 90%
+    - Memory usage: \> 90%
     - System is not functional
   </Card>
 </CardGroup>
@@ -356,32 +363,16 @@ monitor.startMonitoring(60000); // Check every minute
 ## Related Endpoints
 
 <CardGroup cols={2}>
-  <Card
-    title="Limit Check"
-    icon="chart-line"
-    href="/api/system/limit-check"
-  >
+  <Card title="Limit Check" icon="chart-line" href="/api/system/limit-check">
     Check system limits and quotas
   </Card>
-  <Card
-    title="Teardown"
-    icon="trash"
-    href="/api/system/teardown"
-  >
+  <Card title="Teardown" icon="trash" href="/api/system/teardown">
     System teardown and cleanup
   </Card>
-  <Card
-    title="Status Page"
-    icon="globe"
-    href="https://status.hashrails.xyz"
-  >
+  <Card title="Status Page" icon="globe" href="https://status.hashrails.xyz">
     Public system status page
   </Card>
-  <Card
-    title="Support"
-    icon="headset"
-    href="mailto:support@hashrails.xyz"
-  >
+  <Card title="Support" icon="headset" href="mailto:support@hashrails.xyz">
     Get help with system issues
   </Card>
 </CardGroup>
