@@ -53,58 +53,9 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "Authentication",
-            "pages": [
-              "api/auth/login",
-              "api/auth/register",
-              "api/auth/logout",
-              "api/auth/refresh",
-              "api/auth/verify-email",
-              "api/auth/set-password",
-              "api/auth/forgot-password",
-              "api/auth/reset-password",
-              "api/auth/verify-2fa"
-            ]
-          },
-          {
             "group": "System",
             "pages": [
-              "api/system/health",
-              "api/system/limit-check",
-              "api/system/teardown"
-            ]
-          },
-          {
-            "group": "Users",
-            "pages": [
-              "api/users/create",
-              "api/users/update",
-              "api/users/me",
-              "api/users/profile"
-            ]
-          },
-          {
-            "group": "2FA",
-            "pages": [
-              "api/2fa/qrcode",
-              "api/2fa/enable"
-            ]
-          },
-          {
-            "group": "Onboarding",
-            "pages": [
-              "api/onboard/create",
-              "api/onboard/link"
-            ]
-          },
-          {
-            "group": "Clients",
-            "pages": [
-              "api/client/create",
-              "api/client/kyb/token",
-              "api/client/kyb/link",
-              "api/client/kyb/status",
-              "api/client/kyb/documents"
+              "api/system/health"
             ]
           },
           {
@@ -120,24 +71,12 @@
             ]
           },
           {
-            "group": "Customers",
-            "pages": [
-              "api/customers/create",
-              "api/customers/list",
-              "api/customers/get",
-              "api/customers/verification-tasks"
-            ]
-          },
-          {
             "group": "Transactions",
             "pages": [
               "api/transactions/list",
               "api/transactions/create",
               "api/transactions/get-by-reference",
-              "api/transactions/get-by-id",
-              "api/transactions/update",
-              "api/transactions/cancel",
-              "api/transactions/retry"
+              "api/transactions/get-by-id"
             ]
           },
           {
@@ -157,81 +96,6 @@
               "api/rates/currencies",
               "api/rates/networks",
               "api/rates/calculator"
-            ]
-          },
-          {
-            "group": "Transfer Requests",
-            "pages": [
-              "api/transfer-requests/create",
-              "api/transfer-requests/list",
-              "api/transfer-requests/get",
-              "api/transfer-requests/confirm-payment"
-            ]
-          },
-          {
-            "group": "API Keys",
-            "pages": [
-              "api/api-keys/list",
-              "api/api-keys/create",
-              "api/api-keys/get",
-              "api/api-keys/update-label",
-              "api/api-keys/delete",
-              "api/api-keys/logs"
-            ]
-          },
-          {
-            "group": "Webhooks",
-            "pages": [
-              "api/webhooks/create",
-              "api/webhooks/get",
-              "api/webhooks/update",
-              "api/webhooks/test",
-              "api/webhooks/logs",
-              "api/webhooks/resend",
-              "api/webhooks/status"
-            ]
-          },
-          {
-            "group": "IP Whitelist",
-            "pages": [
-              "api/ips/create",
-              "api/ips/list",
-              "api/ips/get",
-              "api/ips/update",
-              "api/ips/delete"
-            ]
-          },
-          {
-            "group": "Notifications",
-            "pages": [
-              "api/notifications/list",
-              "api/notifications/count",
-              "api/notifications/mark-read"
-            ]
-          },
-          {
-            "group": "Landing Forms",
-            "pages": [
-              "api/landing/demo",
-              "api/landing/career"
-            ]
-          },
-          {
-            "group": "WebSocket Health",
-            "pages": [
-              "api/websocket/health",
-              "api/websocket/connections",
-              "api/websocket/subscriptions"
-            ]
-          },
-          {
-            "group": "Provider Webhooks",
-            "pages": [
-              "api/providers/nomba",
-              "api/providers/bridge",
-              "api/providers/juicyway",
-              "api/providers/alatpay",
-              "api/providers/sumsub"
             ]
           }
         ]
