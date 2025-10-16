@@ -210,6 +210,226 @@
           }
         }
       }
+    },
+    "/public/banks": {
+      "get": {
+        "tags": [
+          "Public"
+        ],
+        "summary": "Get supported banks",
+        "description": "Retrieve list of supported banks",
+        "operationId": "getBanks",
+        "responses": {
+          "200": {
+            "description": "Banks retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "access-bank"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Access Bank"
+                          },
+                          "code": {
+                            "type": "string",
+                            "example": "044"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/banks/lookup": {
+      "get": {
+        "tags": [
+          "Public"
+        ],
+        "summary": "Lookup bank by account number",
+        "description": "Lookup bank information by account number",
+        "operationId": "lookupBank",
+        "parameters": [
+          {
+            "name": "account_number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bank account number to lookup"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bank lookup successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "account_number": {
+                          "type": "string",
+                          "example": "1234567890"
+                        },
+                        "account_name": {
+                          "type": "string",
+                          "example": "John Doe"
+                        },
+                        "bank_name": {
+                          "type": "string",
+                          "example": "Access Bank"
+                        },
+                        "bank_code": {
+                          "type": "string",
+                          "example": "044"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/recipients": {
+      "get": {
+        "tags": [
+          "Public"
+        ],
+        "summary": "Get public recipients",
+        "description": "Retrieve list of public recipients",
+        "operationId": "getPublicRecipients",
+        "responses": {
+          "200": {
+            "description": "Recipients retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "rec_123"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "John Doe"
+                          },
+                          "type": {
+                            "type": "string",
+                            "example": "bank"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/virtual-accounts": {
+      "get": {
+        "tags": [
+          "Public"
+        ],
+        "summary": "Get public virtual accounts",
+        "description": "Retrieve list of public virtual accounts",
+        "operationId": "getPublicVirtualAccounts",
+        "responses": {
+          "200": {
+            "description": "Virtual accounts retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "va_123"
+                          },
+                          "account_number": {
+                            "type": "string",
+                            "example": "1234567890"
+                          },
+                          "bank_name": {
+                            "type": "string",
+                            "example": "Access Bank"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

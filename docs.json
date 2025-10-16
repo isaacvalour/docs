@@ -56,7 +56,11 @@
               "api-reference/endpoint/get-public-health",
               "api-reference/endpoint/get-public-rates",
               "api-reference/endpoint/get-public-currencies",
-              "api-reference/endpoint/get-public-networks"
+              "api-reference/endpoint/get-public-networks",
+              "api-reference/endpoint/get-public-banks",
+              "api-reference/endpoint/get-public-banks-lookup",
+              "api-reference/endpoint/get-public-recipients",
+              "api-reference/endpoint/get-public-virtual-accounts"
             ]
           }
         ]
