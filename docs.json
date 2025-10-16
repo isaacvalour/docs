@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "HR API Documentation",
+  "name": "Valour API Documentation",
   "colors": {
     "primary": "#00ff00",
     "light": "#49b648",
@@ -53,49 +53,137 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "System",
+            "group": "Introduction",
             "pages": [
-              "api/system/health"
+              "api-reference/introduction"
             ]
           },
           {
-            "group": "Virtual Accounts",
+            "group": "Authentication",
             "pages": [
-              "api/virtual-accounts/requests",
-              "api/virtual-accounts/request/account",
-              "api/virtual-accounts/requests/process",
-              "api/virtual-accounts/suspend",
-              "api/virtual-accounts/metrics",
-              "api/virtual-accounts/get",
-              "api/virtual-accounts/activities"
+              "api/post-auth-login",
+              "api/post-auth-register",
+              "api/post-auth-logout",
+              "api/post-auth-refresh",
+              "api/post-auth-forgot-password",
+              "api/post-auth-reset-password",
+              "api/post-auth-set-password",
+              "api/post-auth-verify-email",
+              "api/post-auth-verify-2fa"
+            ]
+          },
+          {
+            "group": "2FA",
+            "pages": [
+              "api/post-2fa-enable",
+              "api/get-2fa-qrcode"
+            ]
+          },
+          {
+            "group": "Users",
+            "pages": [
+              "api/get-users-me",
+              "api/get-users-profile",
+              "api/post-users",
+              "api/patch-users-{id}"
+            ]
+          },
+          {
+            "group": "Customers",
+            "pages": [
+              "api/get-customers",
+              "api/post-customers",
+              "api/get-customers-{id}",
+              "api/get-customers-{id}-verification-tasks"
+            ]
+          },
+          {
+            "group": "API Keys",
+            "pages": [
+              "api/get-api-keys",
+              "api/post-api-keys",
+              "api/get-api-keys-{id}",
+              "api/delete-api-keys-{id}",
+              "api/patch-api-keys-{id}-label",
+              "api/get-api-keys-{id}-logs"
             ]
           },
           {
             "group": "Transactions",
             "pages": [
-              "api/transactions/list",
-              "api/transactions/create",
-              "api/transactions/get-by-reference",
-              "api/transactions/get-by-id"
+              "api/get-transactions",
+              "api/post-transactions",
+              "api/get-transactions-{id}",
+              "api/patch-transactions-{id}",
+              "api/get-transactions-reference-{reference}",
+              "api/post-transactions-{id}-cancel",
+              "api/post-transactions-{id}-retry"
             ]
           },
           {
             "group": "Recipients",
             "pages": [
-              "api/recipients/fiat",
-              "api/recipients/crypto",
-              "api/recipients/list",
-              "api/recipients/get",
-              "api/recipients/delete"
+              "api/get-recipients",
+              "api/post-recipients-crypto",
+              "api/post-recipients-fiat",
+              "api/get-recipients-{id}",
+              "api/delete-recipients-{id}"
+            ]
+          },
+          {
+            "group": "Virtual Accounts",
+            "pages": [
+              "api/get-virtual-accounts-{id}",
+              "api/post-virtual-accounts-requests",
+              "api/get-virtual-accounts-{id}-activities",
+              "api/get-virtual-accounts-{id}-metrics",
+              "api/post-virtual-accounts-{id}-suspend"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api/post-webhooks",
+              "api/get-webhooks-{id}",
+              "api/patch-webhooks-{id}",
+              "api/post-webhooks-{id}-test",
+              "api/get-webhooks-{id}-logs",
+              "api/post-webhooks-{id}-resend",
+              "api/get-webhooks-{id}-status"
             ]
           },
           {
             "group": "Rates",
             "pages": [
-              "api/rates/list",
-              "api/rates/currencies",
-              "api/rates/networks",
-              "api/rates/calculator"
+              "api/get-rates",
+              "api/post-rates-calculator",
+              "api/get-rates-currencies",
+              "api/get-rates-networks"
+            ]
+          },
+          {
+            "group": "System",
+            "pages": [
+              "api/get-system-health",
+              "api/get-system-limit-check"
+            ]
+          },
+          {
+            "group": "IP Management",
+            "pages": [
+              "api/get-ips",
+              "api/post-ips",
+              "api/get-ips-{id}",
+              "api/patch-ips-{id}",
+              "api/delete-ips-{id}"
+            ]
+          },
+          {
+            "group": "Notifications",
+            "pages": [
+              "api/get-notifications",
+              "api/get-notifications-count",
+              "api/patch-notifications-mark-read"
             ]
           }
         ]
@@ -105,36 +193,36 @@
       "anchors": [
         {
           "anchor": "Dashboard",
-          "href": "https://dashboard.hashrails.xyz",
+          "href": "https://dashboard.railsfromthecrypt.com",
           "icon": "chart-line"
         },
         {
           "anchor": "Support",
-          "href": "mailto:support@hashrails.xyz",
+          "href": "mailto:support@railsfromthecrypt.com",
           "icon": "headset"
         }
       ]
     }
   },
   "logo": {
-    "light": "https://dashboard.hashrails.xyz/images/hashrails-logo.svg",
-    "dark": "https://dashboard.hashrails.xyz/images/hashrails-logo.svg"
+    "light": "https://dashboard.railsfromthecrypt.com/images/valour-logo.svg",
+    "dark": "https://dashboard.railsfromthecrypt.com/images/valour-logo.svg"
   },
   "navbar": {
     "links": [
       {
         "label": "Status",
-        "href": "https://status.hashrails.xyz"
+        "href": "https://status.railsfromthecrypt.com"
       },
       {
         "label": "Support",
-        "href": "mailto:support@hashrails.xyz"
+        "href": "mailto:support@railsfromthecrypt.com"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Get Started",
-      "href": "https://docs.hashrails.xyz/quickstart"
+      "href": "https://docs.railsfromthecrypt.com/quickstart"
     }
   },
   "contextual": {
@@ -151,9 +239,9 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/hashrails",
-      "github": "https://github.com/hashrails",
-      "linkedin": "https://linkedin.com/company/hashrails"
+      "x": "https://x.com/railsfromthecrypt",
+      "github": "https://github.com/isaacvalour",
+      "linkedin": "https://linkedin.com/company/railsfromthecrypt"
     }
   },
   "servers": [
@@ -161,7 +249,7 @@
       "url": "https://api.railsfromthecrypt.com/"
     },
     {
-      "url": "https://api.hashrails.com/"
+      "url": "https://staging-api.railsfromthecrypt.com/"
     }
   ],
   "security": [

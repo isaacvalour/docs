@@ -1,23 +1,40 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'Valour API Reference'
+description: 'Complete API documentation for Valour - a comprehensive financial services platform'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Welcome to Valour API
 
-## Welcome
+The Valour API provides a comprehensive suite of financial services including KYC, payments, virtual accounts, and compliance solutions. This documentation covers all available endpoints with detailed examples and response schemas.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## Getting Started
+
+### Authentication
+
+The Valour API uses two authentication methods:
+
+1. **Bearer Token Authentication**: Include your JWT token in the Authorization header
+2. **API Key Authentication**: Include your API key in the X-API-Key header
+
+### Base URLs
+
+- **Production**: `https://api.railsfromthecrypt.com/`
+- **Staging**: `https://staging-api.railsfromthecrypt.com/`
+
+### Rate Limiting
+
+API requests are rate limited to ensure fair usage. Rate limits are applied per API key and reset every hour.
+
+### Error Handling
+
+All API responses follow a consistent format. Error responses include detailed error codes and messages to help with debugging.
 
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
+  title="OpenAPI Specification"
+  icon="code"
+  href="https://github.com/isaacvalour/docs/blob/main/api-reference/openapi.json"
 >
-  View the OpenAPI specification file
+  View the complete OpenAPI specification
 </Card>
 
 ## Authentication
