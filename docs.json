@@ -123,7 +123,7 @@
   },
   "servers": [
     {
-      "url": "https://api.railsfromthecrypt.com/"
+      "url": "https://api.Hashrails.xyz/v1/"
     },
     {
       "url": "https://staging-api.railsfromthecrypt.com/v1/"
@@ -136,7 +136,7 @@
   ],
  "api": {
 		"mdx":{
-			"server": "https://api.railsfromthecrypt.com/"
+			"server": "https://api.Hashrails.xyz/v1/"
 		},
     "auth": {
       "method": "bearer"
