@@ -38,14 +38,6 @@
               "guides/customers",
               "guides/recipients"
             ]
-          },
-          {
-            "group": "SDKs & Examples",
-            "pages": [
-              "sdks/javascript",
-              "sdks/python",
-              "sdks/curl-examples"
-            ]
           }
         ]
       },
