@@ -126,7 +126,7 @@
       "url": "https://api.railsfromthecrypt.com/"
     },
     {
-      "url": "https://staging-api.railsfromthecrypt.com/"
+      "url": "https://staging-api.railsfromthecrypt.com/v1/"
     }
   ],
   "security": [

@@ -20,7 +20,7 @@
       "description": "Production server"
     },
     {
-      "url": "https://staging-api.railsfromthecrypt.com/",
+      "url": "https://staging-api.railsfromthecrypt.com/v1/",
       "description": "Staging server"
     }
   ],
