@@ -41,11 +41,6 @@
         "summary": "Authenticate user with email and password",
         "description": "Authenticate user with email and password",
         "operationId": "login",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful response",
