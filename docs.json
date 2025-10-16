@@ -49,6 +49,15 @@
             "pages": [
               "api-reference/introduction"
             ]
+          },
+          {
+            "group": "Public Endpoints",
+            "pages": [
+              "api-reference/endpoint/get-public-health",
+              "api-reference/endpoint/get-public-rates",
+              "api-reference/endpoint/get-public-currencies",
+              "api-reference/endpoint/get-public-networks"
+            ]
           }
         ]
       }
