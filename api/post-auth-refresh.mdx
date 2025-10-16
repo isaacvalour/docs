@@ -1,6 +1,6 @@
 ---
-title: "Get new access token using refresh token"
-api: "POST /auth/refresh"
+title: "Refresh Access Token"
+api: "POST /v1/auth/refresh"
 description: "Get new access token using refresh token"
 ---
 
@@ -8,14 +8,12 @@ description: "Get new access token using refresh token"
 
 Get new access token using refresh token
 
-<Note>
-This endpoint requires authentication. Include your API key in the `X-API-Key` header or use Bearer token authentication.
-</Note>
-
 ## Request
 
-<ParamField body="data" type="object" required>
-  Request body data
+<ParamField body="refresh_token" type="string" required>
+  JWT refresh token
+  
+  **Example:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 </ParamField>
 
 ## Response Codes
@@ -27,11 +25,11 @@ This endpoint requires authentication. Include your API key in the `X-API-Key` h
 </ResponseField>
 
 <ResponseField name="message" type="string">
-  Success message
+  Token refreshed successfully
 </ResponseField>
 
 <ResponseField name="data" type="object">
-  Response data
+  Response data (AuthResponseDto)
 </ResponseField>
 
 ### Error Responses
@@ -41,7 +39,55 @@ This endpoint requires authentication. Include your API key in the `X-API-Key` h
 </ResponseField>
 
 <ResponseField name="message" type="string">
-  Error message
+  Bad Request - Invalid input data
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  Error details
+</ResponseField>
+
+<ResponseField name="status" type="number">
+  HTTP status code: 401
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Unauthorized - Invalid credentials or token
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  Error details
+</ResponseField>
+
+<ResponseField name="status" type="number">
+  HTTP status code: 403
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Forbidden - Access denied
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  Error details
+</ResponseField>
+
+<ResponseField name="status" type="number">
+  HTTP status code: 429
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Too Many Requests - Rate limit exceeded
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  Error details
+</ResponseField>
+
+<ResponseField name="status" type="number">
+  HTTP status code: 500
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Internal Server Error - Server error
 </ResponseField>
 
 <ResponseField name="error" type="object">
@@ -54,21 +100,20 @@ This endpoint requires authentication. Include your API key in the `X-API-Key` h
 
 ```bash cURL
 curl -X POST \
-  '/auth/refresh' \
+  'https://api.railsfromthecrypt.com/v1/auth/refresh' \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer YOUR_TOKEN'
+  -H 'Authorization: Bearer YOUR_TOKEN' \
+  -d '{"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}'
 ```
 
 ```javascript JavaScript
-const response = await fetch('/auth/refresh', {
+const response = await fetch('https://api.railsfromthecrypt.com/v1/auth/refresh', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer YOUR_TOKEN'
   },
-  body: JSON.stringify({
-    // Request body data
-  })
+  body: JSON.stringify({"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."})
 });
 
 const data = await response.json();
@@ -78,14 +123,12 @@ console.log(data);
 ```python Python
 import requests
 
-url = '/auth/refresh'
+url = 'https://api.railsfromthecrypt.com/v1/auth/refresh'
 headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer YOUR_TOKEN'
 }
-data = {
-    # Request body data
-}
+data = {"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
 
 response = requests.post(url, headers=headers, json=data)
 result = response.json()
@@ -103,7 +146,15 @@ print(result)
   "status": 200,
   "message": "Success",
   "data": {
-    "key": "value"
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "email": "user@example.com",
+      "name": "John Doe",
+      "role": "user"
+    },
+    "expires_in": 3600
   }
 }
 ```
