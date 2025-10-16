@@ -1,0 +1,122 @@
+---
+title: "Get new access token using refresh token"
+api: "POST /auth/refresh"
+description: "Get new access token using refresh token"
+---
+
+## Overview
+
+Get new access token using refresh token
+
+<Note>
+This endpoint requires authentication. Include your API key in the `X-API-Key` header or use Bearer token authentication.
+</Note>
+
+## Request
+
+<ParamField body="data" type="object" required>
+  Request body data
+</ParamField>
+
+## Response Codes
+
+### Success Responses
+
+<ResponseField name="status" type="number">
+  HTTP status code: 200
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Response data
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="status" type="number">
+  HTTP status code: 400
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Error message
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  Error details
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST \
+  '/auth/refresh' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer YOUR_TOKEN'
+```
+
+```javascript JavaScript
+const response = await fetch('/auth/refresh', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_TOKEN'
+  },
+  body: JSON.stringify({
+    // Request body data
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+url = '/auth/refresh'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_TOKEN'
+}
+data = {
+    # Request body data
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+print(result)
+```
+
+</CodeGroup>
+
+## Example Response
+
+### Success Response
+
+```json
+{
+  "status": 200,
+  "message": "Success",
+  "data": {
+    "key": "value"
+  }
+}
+```
+
+### Error Response
+
+```json
+{
+  "status": 400,
+  "message": "Bad Request",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "details": "Invalid input data"
+  }
+}
+```
