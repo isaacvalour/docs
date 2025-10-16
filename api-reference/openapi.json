@@ -1,11 +1,11 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Valour API",
-    "description": "Complete API specification for Valour - a comprehensive financial services platform providing KYC, payments, virtual accounts, and compliance solutions.",
+    "title": "HashRails API",
+    "description": "Complete API specification for HashRails - a comprehensive financial services platform providing KYC, payments, virtual accounts, and compliance solutions.",
     "version": "1.0.0",
     "contact": {
-      "name": "Valour API Support",
+      "name": "HashRails API Support",
       "url": "https://docs.railsfromthecrypt.com",
       "email": "support@railsfromthecrypt.com"
     },

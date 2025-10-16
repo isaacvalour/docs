@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Valour API Documentation",
+  "name": "HashRails API Documentation",
   "colors": {
     "primary": "#00ff00",
     "light": "#49b648",

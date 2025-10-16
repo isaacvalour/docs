@@ -1,11 +1,11 @@
 ---
 title: "Authentication"
-description: "Learn how to authenticate and secure your API calls with Valour API"
+description: "Learn how to authenticate and secure your API calls with HashRails API"
 ---
 
 ## Overview
 
-Valour API uses JWT (JSON Web Tokens) for authentication. This guide covers all aspects of authentication including login, token management, 2FA, and security best practices.
+HashRails API uses JWT (JSON Web Tokens) for authentication. This guide covers all aspects of authentication including login, token management, 2FA, and security best practices.
 
 ## Authentication Flow
 
@@ -639,7 +639,7 @@ response = requests.get(
 Here's a complete example of token management in JavaScript:
 
 ```javascript
-class ValourAPIClient {
+class HashRailsAPIClient {
   constructor(baseUrl, email, password) {
     this.baseUrl = baseUrl;
     this.email = email;
@@ -749,7 +749,7 @@ class ValourAPIClient {
 }
 
 // Usage
-const client = new ValourAPIClient(
+const client = new HashRailsAPIClient(
   'https://api.railsfromthecrypt.com',
   'your-email@example.com',
   'your-password'

@@ -1,11 +1,11 @@
 ---
 title: "Quick Start"
-description: "Get up and running with Valour API in minutes"
+description: "Get up and running with HashRails API in minutes"
 ---
 
 ## Overview
 
-This quickstart guide will help you make your first API call to Valour API in just a few minutes. We'll walk you through authentication, making a basic request, and understanding the response.
+This quickstart guide will help you make your first API call to HashRails API in just a few minutes. We'll walk you through authentication, making a basic request, and understanding the response.
 
 <Steps>
   <Step title="Get API Credentials">
@@ -141,7 +141,7 @@ print(data)
 ```json Response
 {
   "status": true,
-  "service": "Valour API service"
+  "service": "HashRails API service"
 }
 ```
 
@@ -362,18 +362,18 @@ For production applications, use environment variables to store your credentials
 <CodeGroup>
 
 ```bash .env
-VALOUR_API_BASE_URL=https://api.railsfromthecrypt.com
-VALOUR_API_EMAIL=your-email@example.com
-VALOUR_API_PASSWORD=your-password
-VALOUR_ACCESS_TOKEN=your-access-token
+HASHRAILS_API_BASE_URL=https://api.railsfromthecrypt.com
+HASHRAILS_API_EMAIL=your-email@example.com
+HASHRAILS_API_PASSWORD=your-password
+HASHRAILS_ACCESS_TOKEN=your-access-token
 ```
 
 ```javascript JavaScript
 const config = {
-  baseUrl: process.env.VALOUR_API_BASE_URL,
-  email: process.env.VALOUR_API_EMAIL,
-  password: process.env.VALOUR_API_PASSWORD,
-  accessToken: process.env.VALOUR_ACCESS_TOKEN
+  baseUrl: process.env.HASHRAILS_API_BASE_URL,
+  email: process.env.HASHRAILS_API_EMAIL,
+  password: process.env.HASHRAILS_API_PASSWORD,
+  accessToken: process.env.HASHRAILS_ACCESS_TOKEN
 };
 ```
 
@@ -381,10 +381,10 @@ const config = {
 import os
 
 config = {
-    'base_url': os.getenv('VALOUR_API_BASE_URL'),
-    'email': os.getenv('VALOUR_API_EMAIL'),
-    'password': os.getenv('VALOUR_API_PASSWORD'),
-    'access_token': os.getenv('VALOUR_ACCESS_TOKEN')
+    'base_url': os.getenv('HASHRAILS_API_BASE_URL'),
+    'email': os.getenv('HASHRAILS_API_EMAIL'),
+    'password': os.getenv('HASHRAILS_API_PASSWORD'),
+    'access_token': os.getenv('HASHRAILS_ACCESS_TOKEN')
 }
 ```
 
